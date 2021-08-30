@@ -1,17 +1,21 @@
 import React, { useState } from 'react'
-import { Avatar, Button, TextField, Grid, Box, Typography, Container, FormControl, InputAdornment, IconButton, OutlinedInput, InputLabel } from '@material-ui/core'
+import { Avatar, Button, TextField, Grid, Box, Typography, Container, FormControl, InputAdornment, IconButton, OutlinedInput, InputLabel, Snackbar } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import AccountCircle from '@material-ui/icons/AccountCircle'
 import Visibility from '@material-ui/icons/Visibility'
 import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles'
-import bgImg from '../images/svgs/login-bg.svg'
+import Blob1 from '../images/svgs/Blob1.svg'
+import { useHistory } from 'react-router-dom'
+
+const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const passRegex = /^[a-zA-Z0-9!@#$%^&*]{6,16}$/;
 
 const theme = createTheme({
   palette: {
     primary: {
       light: '#757ce8',
-      main: '#1565c0',
+      main: '#4A5CFF',
       dark: '#002884',
       contrastText: '#fff',
     },
@@ -43,15 +47,25 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
-    backgroundImage: `url(${bgImg})`,
-    backgroundSize: 'cover',
-    backgroundRepeat: 'no-repeat',
-    position: 'relative'
+    position: 'relative',
+    overflow: 'hidden'
   },
   paper: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+  },
+  blob1: {
+    position: 'absolute',
+    top: "-50%",
+    left: "-20%",
+    zIndex: -1
+  },
+  blob2: {
+    position: 'absolute',
+    bottom: "-50%",
+    right: "-20%",
+    zIndex: -1
   },
   avatar: {
     margin: theme.spacing(1),
@@ -71,8 +85,11 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignIn() {
   const classes = useStyles()
+  const history = useHistory()
   const [showPass, setShowPass] = useState(false)
+  const [openSnack, setOpenSnack] = useState(false)
   const [detail, setDetail] = useState({ password: '', email: '' });
+  const [isCorrect, setIsCorrect] = useState({ pass: false, eml: false });
 
   const handleChange = (prop) => (event) => {
     setDetail({ ...detail, [prop]: event.target.value });
@@ -80,9 +97,56 @@ export default function SignIn() {
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
+  const handleSnack = () => {
+    setOpenSnack(false)
+  }
+
+  const handleSubmit = () => {
+    if (detail.password === '' || detail.email === '') {
+      setIsCorrect({ pass: true, eml: true })
+      return
+    }
+    if (!emailRegex.test(detail.email) || !passRegex.test(detail.password)) {
+      if (!emailRegex.test(detail.email)) {
+        setIsCorrect({ ...isCorrect, eml: true })
+      }
+      if (!passRegex.test(detail.password)) {
+        setIsCorrect({ ...isCorrect, pass: true })
+      }
+      return
+    }
+    fetch('https://sgp-feedback-system.herokuapp.com/login', {
+      method: 'POST',
+      headers: {
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify(detail)
+    })
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        setOpenSnack(true)
+        localStorage.setItem('user', JSON.stringify(res))
+        localStorage.setItem('token', JSON.stringify(res.token))
+        history.push('/dashboard')
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Box className={classes.main}>
+        <img className={classes.blob1} src={Blob1} alt="Blob1" />
+        <img className={classes.blob2} src={Blob1} alt="Blob2" />
+        <Snackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          open={openSnack}
+          onClose={handleSnack}
+          message="Success"
+          key={'topright'}
+        />
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
             <Avatar className={classes.avatar}>
@@ -100,13 +164,14 @@ export default function SignIn() {
                 id="email"
                 label="Email Address"
                 name="email"
+                error={isCorrect.eml}
                 autoComplete="email"
                 value={detail.email}
                 onChange={handleChange('email')}
                 autoFocus
               />
               <FormControl style={{ margin: "0.5em 0 0 0" }} fullWidth variant='outlined'>
-                <InputLabel htmlFor="password">Password</InputLabel>
+                <InputLabel error={isCorrect.pass} htmlFor="password">Password</InputLabel>
                 <OutlinedInput
                   id="password"
                   label="Password"
@@ -114,6 +179,7 @@ export default function SignIn() {
                   type={showPass ? 'text' : 'password'}
                   required
                   fullWidth
+                  error={isCorrect.pass}
                   value={detail.password}
                   onChange={handleChange('password')}
                   endAdornment={
@@ -135,17 +201,18 @@ export default function SignIn() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
+                onClick={handleSubmit}
               >
                 Sign In
               </Button>
               <Grid container>
                 <Grid item xs>
-                  <Link to="/forget">
+                  <Link style={{ textDecoration: 'none' }} to="/forget">
                     Forgot password?
                   </Link>
                 </Grid>
                 <Grid item>
-                  <Link to="/signup">
+                  <Link style={{ textDecoration: 'none' }} to="/signup">
                     {"Don't have an account? Sign Up"}
                   </Link>
                 </Grid>

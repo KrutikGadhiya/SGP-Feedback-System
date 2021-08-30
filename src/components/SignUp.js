@@ -5,13 +5,13 @@ import Face from '@material-ui/icons/FaceOutlined'
 import Visibility from '@material-ui/icons/Visibility'
 import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles'
-import bgImg from '../images/svgs/signup-bg.svg'
+import Blob2 from '../images/svgs/Blob1.svg'
 
 const theme = createTheme({
   palette: {
     primary: {
       light: '#757ce8',
-      main: '#1565c0',
+      main: '#4A5CFF',
       dark: '#002884',
       contrastText: '#fff',
     },
@@ -43,10 +43,37 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
-    backgroundImage: `url(${bgImg})`,
-    backgroundSize: 'cover',
-    backgroundRepeat: 'no-repeat',
-    position: 'relative'
+    position: 'relative',
+    overflow: 'hidden',
+    zIndex: 1
+  },
+  blob1: {
+    position: 'absolute',
+    // top: '-50%',
+    // left: theme.breakpoints.down('md') ? '-10%' : '-20%',
+    [theme.breakpoints.down('sm')]: {
+      left: "-60%",
+      bottom: "-50%"
+    },
+    [theme.breakpoints.up('md')]: {
+      left: "-20%",
+      bottom: "-50%"
+    },
+    zIndex: -10
+  },
+  blob2: {
+    position: 'absolute',
+    // bottom: "-50%",
+    // right: "-20%",
+    [theme.breakpoints.down('sm')]: {
+      right: "-60%",
+      top: "-50%"
+    },
+    [theme.breakpoints.up('md')]: {
+      right: "-20%",
+      top: "-50%"
+    },
+    zIndex: -10
   },
   paper: {
     display: 'flex',
@@ -55,13 +82,14 @@ const useStyles = makeStyles((theme) => ({
   },
   avatar: {
     margin: theme.spacing(1),
-    backgroundColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.secondary.main,
     width: '3em',
     height: '3em'
   },
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
+    zIndex: theme.zIndex.tooltip
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -86,6 +114,8 @@ export default function SignUp() {
   return (
     <ThemeProvider theme={theme}>
       <Box className={classes.main}>
+        <img className={classes.blob1} src={Blob2} alt="Blob1" />
+        <img className={classes.blob2} src={Blob2} alt="Blob2" />
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
             <Avatar className={classes.avatar}>
@@ -98,12 +128,12 @@ export default function SignUp() {
               <TextField
                 variant="outlined"
                 margin="normal"
-                color="secondary"
                 required
                 fullWidth
                 id="name"
                 label="Full Name"
                 name="name"
+                // error={true}
                 value={detail.name}
                 onChange={handleChange('name')}
                 autoFocus
@@ -111,7 +141,6 @@ export default function SignUp() {
               <TextField
                 variant="outlined"
                 // margin="normal"
-                color="secondary"
                 required
                 fullWidth
                 id="email"
@@ -128,7 +157,6 @@ export default function SignUp() {
                   label="Password"
                   margin="normal"
                   type={showPass ? 'text' : 'password'}
-                  color="secondary"
                   required
                   fullWidth
                   value={detail.password}
@@ -155,7 +183,6 @@ export default function SignUp() {
                   label="Confirm Password"
                   margin="normal"
                   type={showCPass ? 'text' : 'password'}
-                  color="secondary"
                   required
                   fullWidth
                   value={detail.confirmPassword}
@@ -179,7 +206,6 @@ export default function SignUp() {
                 <Select
                   labelId="demo-simple-select-outlined-label"
                   id="demo-simple-select-outlined"
-                  color="secondary"
                   value={detail.role}
                   onChange={handleChange('role')}
                   label="Role"
@@ -196,14 +222,14 @@ export default function SignUp() {
               <Button
                 fullWidth
                 variant="contained"
-                color="secondary"
+                color="primary"
                 className={classes.submit}
               >
                 Sign Up
               </Button>
               <Grid container>
                 <Grid item>
-                  <Link to="/">
+                  <Link style={{ textDecoration: 'none', textAlign: 'right' }} to="/">
                     {"Already have an account? Sign In"}
                   </Link>
                 </Grid>
@@ -215,6 +241,6 @@ export default function SignUp() {
           </Box>
         </Container>
       </Box>
-    </ThemeProvider>
+    </ThemeProvider >
   );
 }
