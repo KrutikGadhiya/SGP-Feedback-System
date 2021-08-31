@@ -57,14 +57,30 @@ const useStyles = makeStyles((theme) => ({
   },
   blob1: {
     position: 'absolute',
-    top: "-50%",
-    left: "-20%",
+    [theme.breakpoints.down('sm')]: {
+      left: "-60%",
+      top: "-50%"
+    },
+    // [theme.breakpoints.between('xs', 'sm')]: {
+    //   left: "-100%",
+    //   top: "-70%"
+    // },
+    [theme.breakpoints.up('md')]: {
+      left: "-20%",
+      top: "-50%"
+    },
     zIndex: -1
   },
   blob2: {
     position: 'absolute',
-    bottom: "-50%",
-    right: "-20%",
+    [theme.breakpoints.down('sm')]: {
+      right: "-60%",
+      bottom: "-50%"
+    },
+    [theme.breakpoints.up('md')]: {
+      right: "-20%",
+      bottom: "-50%"
+    },
     zIndex: -1
   },
   avatar: {
@@ -76,6 +92,10 @@ const useStyles = makeStyles((theme) => ({
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
+    borderRadius: theme.spacing(1),
+    padding: theme.spacing(2),
+    // zIndex: theme.zIndex.modal
+    background: '#fff'
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -89,32 +109,29 @@ export default function SignIn() {
   const [showPass, setShowPass] = useState(false)
   const [openSnack, setOpenSnack] = useState(false)
   const [detail, setDetail] = useState({ password: '', email: '' });
-  const [isCorrect, setIsCorrect] = useState({ pass: false, eml: false });
+  const [checkEmail, setCheckEmail] = useState(false)
+  const [checkPass, setCheckPass] = useState(false)
 
   const handleChange = (prop) => (event) => {
     setDetail({ ...detail, [prop]: event.target.value });
+    checkFields(prop === 'email' ? emailRegex : passRegex, event.target.value, prop === 'email' ? setCheckEmail : setCheckPass)
   };
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
-  const handleSnack = () => {
-    setOpenSnack(false)
+  const checkFields = (regex, value, type) => {
+    if (!regex.test(value)) {
+      type(true)
+    } else {
+      type(false)
+    }
   }
 
   const handleSubmit = () => {
     if (detail.password === '' || detail.email === '') {
-      setIsCorrect({ pass: true, eml: true })
       return
     }
-    if (!emailRegex.test(detail.email) || !passRegex.test(detail.password)) {
-      if (!emailRegex.test(detail.email)) {
-        setIsCorrect({ ...isCorrect, eml: true })
-      }
-      if (!passRegex.test(detail.password)) {
-        setIsCorrect({ ...isCorrect, pass: true })
-      }
-      return
-    }
+
     fetch('https://sgp-feedback-system.herokuapp.com/login', {
       method: 'POST',
       headers: {
@@ -143,7 +160,7 @@ export default function SignIn() {
         <Snackbar
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           open={openSnack}
-          onClose={handleSnack}
+          onClose={() => setOpenSnack(false)}
           message="Success"
           key={'topright'}
         />
@@ -164,14 +181,14 @@ export default function SignIn() {
                 id="email"
                 label="Email Address"
                 name="email"
-                error={isCorrect.eml}
+                error={checkEmail}
                 autoComplete="email"
                 value={detail.email}
                 onChange={handleChange('email')}
                 autoFocus
               />
               <FormControl style={{ margin: "0.5em 0 0 0" }} fullWidth variant='outlined'>
-                <InputLabel error={isCorrect.pass} htmlFor="password">Password</InputLabel>
+                <InputLabel error={checkPass} htmlFor="password">Password</InputLabel>
                 <OutlinedInput
                   id="password"
                   label="Password"
@@ -179,7 +196,7 @@ export default function SignIn() {
                   type={showPass ? 'text' : 'password'}
                   required
                   fullWidth
-                  error={isCorrect.pass}
+                  error={checkPass}
                   value={detail.password}
                   onChange={handleChange('password')}
                   endAdornment={

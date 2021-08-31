@@ -1,11 +1,20 @@
 import React, { useState } from 'react'
-import { Avatar, Button, TextField, OutlinedInput, Grid, Box, Typography, Container, FormControl, Select, InputLabel, MenuItem, InputAdornment, IconButton } from '@material-ui/core'
-import { Link } from 'react-router-dom'
+import {
+  Avatar, Button, TextField, OutlinedInput, Grid, Box,
+  Typography, Container, FormControl, Select, InputLabel,
+  MenuItem, InputAdornment, IconButton, Snackbar,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
+} from '@material-ui/core'
+import { Link, useHistory } from 'react-router-dom'
 import Face from '@material-ui/icons/FaceOutlined'
 import Visibility from '@material-ui/icons/Visibility'
 import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles'
 import Blob2 from '../images/svgs/Blob1.svg'
+
+const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const passRegex = /^[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+const nameRegex = /^[a-zA-Z0-9_-]{3,16}$/;
 
 const theme = createTheme({
   palette: {
@@ -89,7 +98,10 @@ const useStyles = makeStyles((theme) => ({
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
-    zIndex: theme.zIndex.tooltip
+    borderRadius: theme.spacing(1),
+    padding: theme.spacing(2),
+    // zIndex: theme.zIndex.modal
+    background: '#fff'
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
@@ -99,23 +111,127 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function SignUp() {
+  const history = useHistory()
   const classes = useStyles()
   const [detail, setDetail] = useState({ password: '', confirmPassword: '', name: '', email: '', role: '' });
+  const [vCode, setVCode] = useState('')
   const [showPass, setShowPass] = useState(false)
+  const [openDialog, setOpenDialog] = useState(false)
+  const [openSnack, setOpenSnack] = useState({ open: false, message: 'Success' })
   const [showCPass, setShowCPass] = useState(false)
+  const [checkEmail, setCheckEmail] = useState(false)
+  const [checkPass, setCheckPass] = useState(false)
+  const [checkCPass, setCheckCPass] = useState(false)
+  const [checkName, setCheckName] = useState(false)
 
+  const checkFields = (regex, value, type) => {
+    if (!regex.test(value)) {
+      type(true)
+    } else {
+      type(false)
+    }
+  }
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
   const handleChange = (prop) => (event) => {
     setDetail({ ...detail, [prop]: event.target.value });
+    checkFields(prop === 'email' ? emailRegex : (prop === 'name' ? nameRegex : passRegex), event.target.value, prop === 'email' ? setCheckEmail : (prop === 'name' ? setCheckName : (prop === 'confirmPassword' ? setCheckCPass : setCheckPass)))
   };
+
+  const handleVerification = () => {
+    if (vCode === '') return
+    fetch('https://sgp-feedback-system.herokuapp.com/verify', {
+      method: 'POST',
+      headers: {
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify({
+        email: detail.email,
+        otp: vCode,
+        reSend: false
+      })
+    })
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        setOpenSnack({ open: true, message: 'E-mail Verified Successfully' })
+        setOpenDialog(false)
+        history.push('/')
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+
+  const handleSubmit = () => {
+    if (detail.password === '' || detail.email === '' || detail.name === '' || detail.role === '') {
+      return
+    }
+
+    fetch('https://sgp-feedback-system.herokuapp.com/signup', {
+      method: 'POST',
+      headers: {
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify({
+        email: detail.email,
+        password: detail.password,
+        role: detail.role,
+        userName: detail.name
+      })
+    })
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        setOpenSnack({ open: true, message: 'Successfully Signed-UP' })
+        setOpenDialog(true)
+        // history.push('/')
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <Box className={classes.main}>
         <img className={classes.blob1} src={Blob2} alt="Blob1" />
         <img className={classes.blob2} src={Blob2} alt="Blob2" />
+        <Snackbar
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          open={openSnack.open}
+          onClose={() => setOpenSnack({ ...openSnack, open: false })}
+          message={openSnack.message}
+          key={'topright'}
+        />
+        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} aria-labelledby="form-dialog-title">
+          <DialogTitle id="form-dialog-title">E-Mail Verification</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Please Verify your Email, an 6 - digit Verification code has been sent to your E-mail.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              variant='filled'
+              margin="dense"
+              id="otp"
+              label="Verification Code"
+              type="number"
+              value={vCode}
+              onChange={e => setVCode(e.target.value)}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenDialog(false)} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleVerification} color="primary">
+              Verify
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
             <Avatar className={classes.avatar}>
@@ -133,31 +249,32 @@ export default function SignUp() {
                 id="name"
                 label="Full Name"
                 name="name"
-                // error={true}
+                error={checkName}
                 value={detail.name}
                 onChange={handleChange('name')}
                 autoFocus
               />
               <TextField
                 variant="outlined"
-                // margin="normal"
                 required
                 fullWidth
                 id="email"
                 label="Email Address"
                 name="email"
                 value={detail.email}
+                error={checkEmail}
                 onChange={handleChange('email')}
                 autoComplete="email"
               />
               <FormControl style={{ margin: "0.5em 0 0 0" }} fullWidth variant='outlined'>
-                <InputLabel htmlFor="password">Password</InputLabel>
+                <InputLabel error={checkPass} htmlFor="password">Password</InputLabel>
                 <OutlinedInput
                   id="password"
                   label="Password"
                   margin="normal"
                   type={showPass ? 'text' : 'password'}
                   required
+                  error={checkPass}
                   fullWidth
                   value={detail.password}
                   onChange={handleChange('password')}
@@ -177,7 +294,7 @@ export default function SignUp() {
               </FormControl>
 
               <FormControl style={{ margin: "0.5em 0" }} fullWidth variant='outlined'>
-                <InputLabel htmlFor="Cpassword">Confirm Password</InputLabel>
+                <InputLabel error={checkCPass} htmlFor="Cpassword">Confirm Password</InputLabel>
                 <OutlinedInput
                   id="Cpassword"
                   label="Confirm Password"
@@ -185,6 +302,7 @@ export default function SignUp() {
                   type={showCPass ? 'text' : 'password'}
                   required
                   fullWidth
+                  error={checkCPass}
                   value={detail.confirmPassword}
                   onChange={handleChange('confirmPassword')}
                   endAdornment={
@@ -224,6 +342,7 @@ export default function SignUp() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
+                onClick={handleSubmit}
               >
                 Sign Up
               </Button>
