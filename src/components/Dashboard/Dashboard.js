@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import {
   AppBar,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   Divider,
   Drawer,
   Hidden,
@@ -11,6 +15,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography
 } from "@material-ui/core";
@@ -20,11 +26,11 @@ import { PersonOutlineOutlined, HomeOutlined, AddCircleOutlineOutlined, Settings
 import MenuIcon from "@material-ui/icons/Menu";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useHistory, useLocation } from "react-router-dom";
-import Home from './Home';
+import Home from './Home/Home';
 import User from './User';
 import Settings from './Settings';
 import Students from './Students';
-import NewFeedback from './NewFeedback'
+import NewFeedback from './NewFeedback/NewFeedback'
 
 const drawerWidth = 190;
 
@@ -88,11 +94,30 @@ function ResponsiveDrawer(props) {
   const { window } = props;
   const classes = useStyles();
   const theme = useTheme();
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [confirmation, setConfirmation] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const isMenuOpen = Boolean(anchorEl);
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  const handleMobileMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
+  const handleConfirmation = () => {
+    setAnchorEl(null);
+    setConfirmation(false)
+  }
+  const handleLogout = () => {
+    setConfirmation(false)
+    localStorage.clear()
+    history.push('/')
+  }
 
   const drawer = (
     <div>
@@ -144,11 +169,25 @@ function ResponsiveDrawer(props) {
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
+              onClick={handleMobileMenuOpen}
               color="inherit"
             >
               <AccountCircle />
             </IconButton>
           </div>
+          <Menu
+            anchorEl={anchorEl}
+            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            id={"User-Menu"}
+            keepMounted
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            open={isMenuOpen}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            <MenuItem onClick={() => setConfirmation(true)}>Logout</MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
       <Box className={classes.panel}>
@@ -192,6 +231,22 @@ function ResponsiveDrawer(props) {
           {props.newfeedback ? <NewFeedback /> : <></>}
         </main>
       </Box>
+      <Dialog
+        open={confirmation}
+        onClose={handleConfirmation}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Are You Sure, You want to Logout?"}</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleConfirmation} color="primary">
+            NO
+          </Button>
+          <Button onClick={handleLogout} color="primary" autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

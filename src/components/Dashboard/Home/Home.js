@@ -1,9 +1,9 @@
 import React from 'react'
 import { Grid, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import LineChart from '../Charts/LineChart'
-import BarChart from '../Charts/BarChart'
-import PieChart from '../Charts/PieChart'
+import LineChart from './LineChart'
+import BarChart from './BarChart'
+import PieChart from './PieChart'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -11,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }))
 
-export default function Home() {
+function Home() {
   const classes = useStyles()
   return (
     <div>
@@ -35,3 +35,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default React.memo(Home)
