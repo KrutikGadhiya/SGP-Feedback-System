@@ -46,7 +46,7 @@ export default function DataTable() {
         setdata(res.data);
       })
       .catch((err) => console.log(err));
-  });
+  }, []);
   return (
     <div style={{ height: 450, width: "100%" }}>
       <DataGrid

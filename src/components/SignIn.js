@@ -132,7 +132,7 @@ export default function SignIn() {
       return
     }
 
-    fetch('https://sgp-feedback-system.herokuapp.com/login', {
+    fetch('https://sgp-feedback-system.herokuapp.com/api/login', {
       method: 'POST',
       headers: {
         "Content-Type": 'application/json'

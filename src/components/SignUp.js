@@ -141,7 +141,7 @@ export default function SignUp() {
 
   const handleVerification = () => {
     if (vCode === '') return
-    fetch('https://sgp-feedback-system.herokuapp.com/verify', {
+    fetch('https://sgp-feedback-system.herokuapp.com/api/verify', {
       method: 'POST',
       headers: {
         "Content-Type": 'application/json'
@@ -169,7 +169,7 @@ export default function SignUp() {
       return
     }
 
-    fetch('https://sgp-feedback-system.herokuapp.com/signup', {
+    fetch('https://sgp-feedback-system.herokuapp.com/api/signup', {
       method: 'POST',
       headers: {
         "Content-Type": 'application/json'
