@@ -80,14 +80,6 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
 }));
 
-const listItems = [
-  { text: "Home", icon: <HomeOutlined />, path: "/dashboard" },
-  { text: "User", icon: <PersonOutlineOutlined />, path: "/user" },
-  { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/newfeedback" },
-  { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
-  { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
-]
-
 function ResponsiveDrawer(props) {
   const history = useHistory()
   const location = useLocation()
@@ -118,6 +110,18 @@ function ResponsiveDrawer(props) {
     localStorage.clear()
     history.push('/')
   }
+
+  const listItems = JSON.parse(localStorage.getItem('user')).role === "student" ? [
+    { text: "Feedback", icon: <HomeOutlined />, path: "/newfeedback" },
+  ] : [
+    { text: "Home", icon: <HomeOutlined />, path: "/dashboard" },
+    { text: "User", icon: <PersonOutlineOutlined />, path: "/user" },
+    { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/newfeedback" },
+    { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
+    { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
+  ]
+
+
 
   const drawer = (
     <div>
@@ -162,7 +166,7 @@ function ResponsiveDrawer(props) {
             <MenuIcon />
           </IconButton>
           <Typography className={classes.title} variant="h6" noWrap>
-            Welcome User
+            Welcome {JSON.parse(localStorage.getItem('user')).userName}
           </Typography>
           <div>
             <IconButton

@@ -1,15 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
+import './index.css';
 import App from './App';
 
 ReactDOM.render(
   <React.StrictMode>
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <App />
-    </MuiPickersUtilsProvider>
+    <Router>
+      <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <App />
+      </MuiPickersUtilsProvider>
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );

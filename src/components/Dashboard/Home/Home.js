@@ -13,24 +13,27 @@ const useStyles = makeStyles((theme) => ({
 
 function Home() {
   const classes = useStyles()
+  // useEffect(() => {
+
+  // }, [])
   return (
     <div>
       <Grid container spacing={1}>
-        <Grid item xs={12} lg={6} xl={6} md={6}>
+        {JSON.parse(localStorage.getItem('user')).role === "admin" ? (<><Grid item xs={12} lg={6} xl={6} md={6}>
           <Paper className={classes.paper}>
             <PieChart />
           </Paper>
         </Grid>
-        <Grid item xs={12} lg={6} xl={6} md={6}>
-          <Paper className={classes.paper}>
-            <BarChart />
-          </Paper>
-        </Grid>
-        <Grid item xs={12} lg={12} xl={12} md={12}>
-          <Paper className={classes.paper}>
-            <LineChart />
-          </Paper>
-        </Grid>
+          <Grid item xs={12} lg={6} xl={6} md={6}>
+            <Paper className={classes.paper}>
+              <BarChart />
+            </Paper>
+          </Grid>
+          <Grid item xs={12} lg={12} xl={12} md={12}>
+            <Paper className={classes.paper}>
+              <LineChart />
+            </Paper>
+          </Grid></>) : <></>}
       </Grid>
     </div>
   )

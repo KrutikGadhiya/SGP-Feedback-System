@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Avatar, Button, TextField, Grid, Box, Typography, Container, FormControl, InputAdornment, IconButton, OutlinedInput, InputLabel, Snackbar } from '@material-ui/core'
+import { Avatar, Button, TextField, Grid, Box, Typography, Container, FormControl, InputAdornment, IconButton, OutlinedInput, InputLabel, Snackbar, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@material-ui/core'
 import { Link } from 'react-router-dom'
 import AccountCircle from '@material-ui/icons/AccountCircle'
 import Visibility from '@material-ui/icons/Visibility'
@@ -9,7 +9,7 @@ import Blob1 from '../images/svgs/Blob1.svg'
 import { useHistory } from 'react-router-dom'
 
 const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const passRegex = /^[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+const passRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,16}$/;
 
 const theme = createTheme({
   palette: {
@@ -101,13 +101,21 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2),
     padding: '0.75em'
   },
+  linktxt: {
+    paddingTop: theme.spacing(2),
+  },
+  link: {
+    cursor: 'pointer',
+  }
 }));
 
 export default function SignIn() {
   const classes = useStyles()
   const history = useHistory()
+  const [vCode, setVCode] = useState('')
+  const [openDialog, setOpenDialog] = useState(false)
   const [showPass, setShowPass] = useState(false)
-  const [openSnack, setOpenSnack] = useState(false)
+  const [openSnack, setOpenSnack] = useState({ open: false, message: 'Success' })
   const [detail, setDetail] = useState({ password: '', email: '' });
   const [checkEmail, setCheckEmail] = useState(false)
   const [checkPass, setCheckPass] = useState(false)
@@ -127,6 +135,34 @@ export default function SignIn() {
     }
   }
 
+  const handleVerification = (resend = false) => {
+    if (!resend && vCode === '') return
+    fetch('https://sgp-feedback-system.herokuapp.com/api/verify', {
+      method: 'POST',
+      headers: {
+        "Content-Type": 'application/json'
+      },
+      body: JSON.stringify({
+        email: detail.email,
+        otp: vCode,
+        reSend: resend
+      })
+    })
+      .then(res => res.json())
+      .then(res => {
+        console.log(res)
+        if (resend) {
+          setOpenDialog(true)
+          setOpenSnack({ open: true, message: 'Verification Code Send to your E-mail' })
+        } else {
+          setOpenSnack({ open: true, message: 'E-mail Verified Successfully, Please try to Login Again' })
+          setOpenDialog(false)
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
   const handleSubmit = () => {
     if (detail.password === '' || detail.email === '') {
       return
@@ -142,26 +178,72 @@ export default function SignIn() {
       .then(res => res.json())
       .then(res => {
         console.log(res)
-        setOpenSnack(true)
-        localStorage.setItem('user', JSON.stringify(res))
-        localStorage.setItem('token', JSON.stringify(res.token))
-        history.push('/dashboard')
+        let statusCode = res.status
+        if (statusCode === 422 || statusCode === 401 || statusCode === 500 || statusCode === 404) {
+          throw res.message
+        }
+        if (!res.isVerified) {
+          setOpenDialog(true)
+        } else {
+          setOpenSnack({ open: true, message: "Successfully SignedIN" })
+          localStorage.setItem('user', JSON.stringify(res))
+          localStorage.setItem('token', JSON.stringify(res.token))
+          if (res.role === "student")
+            history.push('/newfeedback')
+          else
+            history.push('/dashboard')
+        }
       })
       .catch(err => {
         console.log(err)
+        setOpenSnack({ open: true, message: err })
       })
   }
 
   return (
     <ThemeProvider theme={theme}>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">E-Mail Verification</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please Verify your Email, an 6 - digit Verification code was sent to your E-mail.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            variant='filled'
+            margin="dense"
+            id="otp"
+            label="Verification Code"
+            type="number"
+            value={vCode}
+            onChange={e => setVCode(e.target.value)}
+            fullWidth
+          />
+          <Typography
+            className={classes.linktxt}
+            variant='h6'
+          >
+            Did't receive the mail?
+            <Button onClick={() => handleVerification(true)} className={classes.link}>Click here</Button>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={() => handleVerification(false)} color="primary">
+            Verify
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Box className={classes.main}>
         <img className={classes.blob1} src={Blob1} alt="Blob1" />
         <img className={classes.blob2} src={Blob1} alt="Blob2" />
         <Snackbar
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          open={openSnack}
-          onClose={() => setOpenSnack(false)}
-          message="Success"
+          open={openSnack.open}
+          onClose={() => setOpenSnack({ ...openSnack, open: false })}
+          message={openSnack.message}
           key={'topright'}
         />
         <Container component="main" maxWidth="xs">

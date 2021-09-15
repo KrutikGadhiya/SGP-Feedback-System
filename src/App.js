@@ -1,21 +1,43 @@
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Switch, Route, Redirect, useHistory, useLocation } from 'react-router-dom'
 import SignIn from "./components/SignIn"
 import SignUp from './components/SignUp'
 import Dashboard from './components/Dashboard/Dashboard'
 
-function App() {
+function ProtecedRoute(props) {
   return (
-    <Router>
-      <Switch>
-        <Route exact path='/'><SignIn /></Route>
-        <Route exact path='/signup'><SignUp /></Route>
-        <Route exact path='/dashboard'><Dashboard home /></Route>
-        <Route exact path='/user'><Dashboard user /></Route>
-        <Route exact path='/newfeedback'><Dashboard newfeedback /></Route>
-        <Route exact path='/students'><Dashboard students /></Route>
-        <Route exact path='/settings'><Dashboard settings /></Route>
-      </Switch>
-    </Router>
+    <Route
+      path={props.path}
+      render={(data) => (localStorage.getItem('token') ? (
+        // <props.component {...data} />
+        props.children
+      ) : (
+        <Redirect to={{ pathname: '/' }} />
+      ))}
+    />
+  );
+}
+
+
+function App() {
+  const history = useHistory()
+  const location = useLocation()
+  useEffect(() => {
+    if (localStorage.getItem('token')) {
+      history.push('/dashboard');
+    }
+    // eslint-disable-next-line
+  }, [])
+  return (
+    <Switch location={location} key={location.key}>
+      <Route exact path='/'><SignIn /></Route>
+      <Route exact path='/signup'><SignUp /></Route>
+      <ProtecedRoute exact path='/dashboard'><Dashboard home /></ProtecedRoute>
+      <ProtecedRoute exact path='/user'><Dashboard user /></ProtecedRoute>
+      <ProtecedRoute exact path='/newfeedback'><Dashboard newfeedback /></ProtecedRoute>
+      <ProtecedRoute exact path='/students'><Dashboard students /></ProtecedRoute>
+      <ProtecedRoute exact path='/settings'><Dashboard settings /></ProtecedRoute>
+    </Switch>
   );
 }
 

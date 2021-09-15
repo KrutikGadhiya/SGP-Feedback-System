@@ -13,7 +13,7 @@ import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles
 import Blob2 from '../images/svgs/Blob1.svg'
 
 const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const passRegex = /^[a-zA-Z0-9!@#$%^&*]{6,16}$/;
+const passRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,16}$/;
 const nameRegex = /^[a-zA-Z0-9_-]{3,16}$/;
 
 const theme = createTheme({
@@ -184,12 +184,22 @@ export default function SignUp() {
       .then(res => res.json())
       .then(res => {
         console.log(res)
-        setOpenSnack({ open: true, message: 'Successfully Signed-UP' })
-        setOpenDialog(true)
-        // history.push('/')
+        if (res.status === 200) {
+          setOpenSnack({ open: true, message: 'Successfully Signed-UP' })
+          setOpenDialog(true)
+        } else {
+          if (res.status === 422) {
+            // eslint-disable-next-line no-throw-literal
+            throw res.message
+          } else {
+            // eslint-disable-next-line no-throw-literal
+            throw res.message
+          }
+        }
       })
       .catch(err => {
         console.log(err)
+        setOpenSnack({ open: true, message: err })
       })
   }
 
@@ -331,10 +341,11 @@ export default function SignUp() {
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
-                  <MenuItem value={"Student"}>Student</MenuItem>
-                  <MenuItem value={"Faculty"}>Faculty</MenuItem>
-                  {/* <MenuItem value={"Alimini"}>Alumini</MenuItem> */}
-                  {/* <MenuItem value={"Employer"}>Employer</MenuItem> */}
+                  <MenuItem value={"student"}>Student</MenuItem>
+                  <MenuItem value={"faculty"}>Faculty</MenuItem>
+                  <MenuItem value={"alumini"}>Alumini</MenuItem>
+                  <MenuItem value={"employer"}>Employer</MenuItem>
+                  <MenuItem value={"admin"}>Admin</MenuItem>
                 </Select>
               </FormControl>
               <Button
