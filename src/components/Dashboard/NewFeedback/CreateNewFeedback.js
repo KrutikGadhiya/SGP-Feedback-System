@@ -3,7 +3,12 @@ import {
   Button,
   Dialog,
   Fab,
+  FormControl,
+  InputLabel,
   IconButton,
+  MenuItem,
+  Select,
+  Slide,
   Typography,
   TextField,
   Tooltip
@@ -35,12 +40,34 @@ const styles = makeStyles(theme => ({
   }
 }));
 
+const generateYear = () => {
+  const currentYear = new Date().getFullYear().toString().slice(2, 4)
+  let dep = ['IT', 'CE']
+  let yearList = []
+  dep.forEach(dprt => {
+    for (let i = 18; i <= currentYear; i++) {
+      yearList.push(i + dprt)
+    }
+  })
+  return yearList
+}
+
 const Form = props => {
   const { classes } = props;
-  const [name, setName] = useState('');
-  const [desc, setDesc] = useState('');
-  const [dueFrom, setDueFrom] = useState(new Date());
-  const [dueTo, setDueTo] = useState(new Date());
+  const [feedback, setFeedback] = useState({
+    name: '', desc: '', dueFrom: new Date(), dueTo: new Date(), feedbackFor: '', feedbackQue: ''
+  })
+  // const [name, setName] = useState('');
+  // const [desc, setDesc] = useState('');
+  // const [dueFrom, setDueFrom] = useState(new Date());
+  // const [dueTo, setDueTo] = useState(new Date());
+
+  const handleChange = (prop) => (event) => {
+    if (prop === 'dueTo' || prop === 'dueFrom')
+      setFeedback({ ...feedback, [prop]: event })
+    else
+      setFeedback({ ...feedback, [prop]: event.target.value })
+  }
   return (
     <>
       <TextField
@@ -48,8 +75,9 @@ const Form = props => {
         fullWidth
         variant="outlined"
         className={classes.input}
-        value={name}
-        onChange={e => setName(e.target.value)}
+        value={feedback.name}
+        onChange={handleChange('name')}
+        required
       />
       <TextField
         label="Description"
@@ -58,28 +86,75 @@ const Form = props => {
         variant="outlined"
         fullWidth
         className={classes.input}
-        value={desc}
-        onChange={e => setDesc(e.target.value)}
+        value={feedback.desc}
+        onChange={handleChange('desc')}
+        required
       />
+      <FormControl fullWidth required style={{ margin: "0 0 1em 0" }} variant="outlined" className={classes.formControl}>
+        <InputLabel id="demo-simple-select-outlined-label">Feedback For</InputLabel>
+        <Select
+          labelId="demo-simple-select-outlined-label"
+          id="demo-simple-select-outlined"
+          value={feedback.feedbackFor}
+          onChange={handleChange('feedbackFor')}
+          label="Feedback For"
+          required
+        >
+          <MenuItem value="">
+            <em>None</em>
+          </MenuItem>
+          {
+            generateYear().map((item) => (
+              <MenuItem value={item} key={item}>{item}</MenuItem>
+            ))
+          }
+        </Select>
+      </FormControl>
+      <FormControl fullWidth required style={{ margin: "0 0 1em 0" }} variant="outlined" className={classes.formControl}>
+        <InputLabel id="demo-simple-select-outlined-label">Feedback Question's</InputLabel>
+        <Select
+          labelId="demo-simple-select-outlined-label"
+          id="demo-simple-select-outlined"
+          value={feedback.feedbackQue}
+          onChange={handleChange('feedbackQue')}
+          label="Feedback Question's"
+          required
+        >
+          <MenuItem selected value="default">
+            <em>Default</em>
+          </MenuItem>
+          {
+            ['IT', 'test'].map((item) => (
+              <MenuItem value={item} key={item}>{item}</MenuItem>
+            ))
+          }
+        </Select>
+      </FormControl>
       <DateTimePicker
         label="Due date From"
         inputVariant="outlined"
         fullWidth
-        value={dueFrom}
-        onChange={setDueFrom}
+        value={feedback.dueFrom}
+        onChange={handleChange('dueFrom')}
         className={classes.input}
+        required
       />
       <DateTimePicker
         label="Due date To"
         inputVariant="outlined"
         fullWidth
-        value={dueTo}
-        onChange={setDueTo}
+        value={feedback.dueTo}
+        onChange={handleChange('dueTo')}
         className={classes.input}
+        required
       />
     </>
   );
 };
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 const NewFeedback = () => {
   const classes = styles();
@@ -87,6 +162,7 @@ const NewFeedback = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
   return (
     <>
       <Tooltip title='New Feedback' aria-label='new-feedback' arrow>
@@ -98,6 +174,8 @@ const NewFeedback = () => {
         onClose={handleClose}
         aria-labelledby="customized-dialog-title"
         open={open}
+        fullScreen
+        TransitionComponent={Transition}
       >
         <MuiDialogTitle
           disableTypography

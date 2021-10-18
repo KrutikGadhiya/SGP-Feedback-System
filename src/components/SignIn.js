@@ -12,7 +12,6 @@ import {
   IconButton,
   OutlinedInput,
   InputLabel,
-  Snackbar,
   Dialog,
   DialogActions,
   DialogContent,
@@ -32,6 +31,9 @@ import Blob1 from "../images/svgs/Blob1.svg";
 import { useHistory } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userInfo, loggin } from "../redux/reducers/userSlice";
+import { openSnack } from '../redux/reducers/snackSlice'
+import { set, reset } from '../redux/reducers/loadingSlice'
+import axios from "axios";
 
 const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,16}$/;
@@ -139,10 +141,10 @@ export default function SignIn() {
   const [vCode, setVCode] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [openSnack, setOpenSnack] = useState({
-    open: false,
-    message: "Success"
-  });
+  // const [openSnack, setOpenSnack] = useState({
+  //   open: false,
+  //   message: "Success"
+  // });
   const [detail, setDetail] = useState({ password: "", email: "" });
   const [checkEmail, setCheckEmail] = useState(false);
   const [checkPass, setCheckPass] = useState(false);
@@ -168,84 +170,82 @@ export default function SignIn() {
 
   const handleVerification = (resend = false) => {
     if (!resend && vCode === "") return;
-    fetch("https://sgp-feedback-system.herokuapp.com/api/verify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: detail.email,
-        otp: vCode,
-        reSend: resend
-      })
+    dispatch(set())
+    axios.post("https://sgp-feedback-system.herokuapp.com/api/verify", {
+      email: detail.email,
+      otp: vCode,
+      reSend: resend
     })
-      .then((res) => res.json())
       .then((res) => {
-        console.log(res);
+        console.log(res.data);
         if (resend) {
           setOpenDialog(true);
-          setOpenSnack({
-            open: true,
-            message: "Verification Code Send to your E-mail"
-          });
+          // setOpenSnack({
+          //   open: true,
+          //   message: "Verification Code Send to your E-mail"
+          // });
+          dispatch(openSnack({ message: 'Verification Code Send to your E-mail', type: "success" }))
+          dispatch(reset())
         } else {
-          setOpenSnack({
-            open: true,
-            message: "E-mail Verified Successfully, Please try to Login Again"
-          });
+          // setOpenSnack({
+          //   open: true,
+          //   message: "E-mail Verified Successfully, Please try to Login Again"
+          // });
+          dispatch(openSnack({ message: 'E-mail Verified Successfully, Please try to Login Again', type: "success" }))
+          dispatch(reset())
           setOpenDialog(false);
         }
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err)
+        dispatch(reset())
+        dispatch(openSnack({ message: err.response.data.message, type: "success" }))
       });
   };
   const handleSubmit = () => {
     if (detail.password === "" || detail.email === "") {
       return;
     }
-
-    fetch("https://sgp-feedback-system.herokuapp.com/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(detail)
+    dispatch(set())
+    axios.post("https://sgp-feedback-system.herokuapp.com/api/login",
+      detail
+    ).then((res) => {
+      console.log(res.data);
+      // let statusCode = res.status;
+      // if (
+      //   statusCode === 422 ||
+      //   statusCode === 401 ||
+      //   statusCode === 500 ||
+      //   statusCode === 404
+      // ) {
+      //   throw res.message;
+      // }
+      dispatch(reset())
+      if (!res.data.isVerified) {
+        setOpenDialog(true);
+      } else {
+        // setOpenSnack({ open: true, message: "Successfully SignedIN" });
+        dispatch(openSnack({ message: 'Successfully SignedIN', type: "success" }))
+        localStorage.setItem("user", JSON.stringify(res.data));
+        localStorage.setItem("token", JSON.stringify(res.data.token));
+        dispatch(
+          userInfo({
+            userName: res.data.userName,
+            email: res.data.email,
+            isVerified: res.data.isVerified,
+            role: res.data.role
+          })
+        );
+        dispatch(loggin());
+        if (res.data.role === "admin") history.push("/dashboard");
+        else history.push("/feedback");
+      }
     })
-      .then((res) => res.json())
-      .then((res) => {
-        console.log(res);
-        let statusCode = res.status;
-        if (
-          statusCode === 422 ||
-          statusCode === 401 ||
-          statusCode === 500 ||
-          statusCode === 404
-        ) {
-          throw res.message;
-        }
-        if (!res.isVerified) {
-          setOpenDialog(true);
-        } else {
-          setOpenSnack({ open: true, message: "Successfully SignedIN" });
-          localStorage.setItem("user", JSON.stringify(res));
-          localStorage.setItem("token", JSON.stringify(res.token));
-          dispatch(
-            userInfo({
-              userName: res.userName,
-              email: res.email,
-              isVerified: res.isVerified,
-              role: res.role
-            })
-          );
-          dispatch(loggin());
-          if (res.role === "student") history.push("/newfeedback");
-          else history.push("/dashboard");
-        }
-      })
       .catch((err) => {
-        console.log(err);
-        setOpenSnack({ open: true, message: err });
+        console.error(err);
+        dispatch(reset())
+        // setOpenSnack({ open: true, message: err });
+        dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       });
   };
 
@@ -295,13 +295,13 @@ export default function SignIn() {
       <Box className={classes.main}>
         <img className={classes.blob1} src={Blob1} alt="Blob1" />
         <img className={classes.blob2} src={Blob1} alt="Blob2" />
-        <Snackbar
+        {/* <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           open={openSnack.open}
           onClose={() => setOpenSnack({ ...openSnack, open: false })}
           message={openSnack.message}
           key={"topright"}
-        />
+        /> */}
         <Container component="main" maxWidth="xs">
           <div className={classes.paper}>
             <Avatar className={classes.avatar}>

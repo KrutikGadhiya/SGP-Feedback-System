@@ -31,6 +31,8 @@ import User from './User';
 import Settings from './Settings';
 import Students from './Students';
 import NewFeedback from './NewFeedback/NewFeedback'
+import { useSelector, useDispatch } from 'react-redux'
+import { logout } from '../../redux/reducers/userSlice'
 
 const drawerWidth = 190;
 
@@ -83,6 +85,8 @@ const useStyles = makeStyles((theme) => ({
 function ResponsiveDrawer(props) {
   const history = useHistory()
   const location = useLocation()
+  const dispatch = useDispatch()
+  const role = useSelector((state) => state.user.role)
   const { window } = props;
   const classes = useStyles();
   const theme = useTheme();
@@ -107,18 +111,19 @@ function ResponsiveDrawer(props) {
   }
   const handleLogout = () => {
     setConfirmation(false)
+    dispatch(logout())
     localStorage.clear()
     history.push('/')
   }
 
-  const listItems = JSON.parse(localStorage.getItem('user')).role === "student" ? [
-    { text: "Feedback", icon: <HomeOutlined />, path: "/newfeedback" },
-  ] : [
+  const listItems = role === "admin" || JSON.parse(localStorage.getItem('user')).role === 'admin' ? [
     { text: "Home", icon: <HomeOutlined />, path: "/dashboard" },
     { text: "User", icon: <PersonOutlineOutlined />, path: "/user" },
-    { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/newfeedback" },
+    { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/feedback" },
     { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
     { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
+  ] : [
+    { text: "Feedback", icon: <HomeOutlined />, path: "/feedback" },
   ]
 
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 import {
   Avatar, Button, TextField, OutlinedInput, Grid, Box,
   Typography, Container, FormControl, Select, InputLabel,
-  MenuItem, InputAdornment, IconButton, Snackbar,
+  MenuItem, InputAdornment, IconButton,
   Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from '@material-ui/core'
 import { Link, useHistory } from 'react-router-dom'
@@ -10,6 +11,9 @@ import Face from '@material-ui/icons/FaceOutlined'
 import Visibility from '@material-ui/icons/Visibility'
 import VisibilityOff from '@material-ui/icons/VisibilityOff'
 import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles'
+import { useDispatch } from "react-redux";
+import { openSnack } from "../redux/reducers/snackSlice";
+import { set, reset } from '../redux/reducers/loadingSlice'
 import Blob2 from '../images/svgs/Blob1.svg'
 
 const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -113,11 +117,12 @@ const useStyles = makeStyles((theme) => ({
 export default function SignUp() {
   const history = useHistory()
   const classes = useStyles()
-  const [detail, setDetail] = useState({ password: '', confirmPassword: '', name: '', email: '', role: '' });
+  const dispatch = useDispatch()
+  const [detail, setDetail] = useState({ password: '', confirmPassword: '', name: '', email: '', role: '', department: '', institute: '' });
   const [vCode, setVCode] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [openDialog, setOpenDialog] = useState(false)
-  const [openSnack, setOpenSnack] = useState({ open: false, message: 'Success' })
+  // const [openSnack, setOpenSnack] = useState({ open: false, message: 'Success' })
   const [showCPass, setShowCPass] = useState(false)
   const [checkEmail, setCheckEmail] = useState(false)
   const [checkPass, setCheckPass] = useState(false)
@@ -141,65 +146,63 @@ export default function SignUp() {
 
   const handleVerification = () => {
     if (vCode === '') return
-    fetch('https://sgp-feedback-system.herokuapp.com/api/verify', {
-      method: 'POST',
-      headers: {
-        "Content-Type": 'application/json'
-      },
-      body: JSON.stringify({
-        email: detail.email,
-        otp: vCode,
-        reSend: false
-      })
+    dispatch(set())
+    axios.post('https://sgp-feedback-system.herokuapp.com/api/verify', {
+      email: detail.email,
+      otp: vCode,
+      reSend: false
     })
-      .then(res => res.json())
       .then(res => {
-        console.log(res)
-        setOpenSnack({ open: true, message: 'E-mail Verified Successfully' })
+        console.log(res.data)
+        dispatch(reset())
+        // setOpenSnack({ open: true, message: 'E-mail Verified Successfully' })
+        dispatch(openSnack({ message: 'E-mail Verified Successfully', type: "success" }))
         setOpenDialog(false)
         history.push('/')
       })
       .catch(err => {
-        console.log(err)
+        console.error(err)
+        dispatch(reset())
+        dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       })
   }
 
   const handleSubmit = () => {
-    if (detail.password === '' || detail.email === '' || detail.name === '' || detail.role === '') {
+    if (detail.password === '' || detail.email === '' || detail.name === '' || detail.role === '' || detail.department === '' || detail.institute === '') {
       return
     }
-
-    fetch('https://sgp-feedback-system.herokuapp.com/api/signup', {
-      method: 'POST',
-      headers: {
-        "Content-Type": 'application/json'
-      },
-      body: JSON.stringify({
-        email: detail.email,
-        password: detail.password,
-        role: detail.role,
-        userName: detail.name
-      })
+    dispatch(set())
+    axios.post('https://sgp-feedback-system.herokuapp.com/api/signup', {
+      email: detail.email,
+      password: detail.password,
+      role: detail.role,
+      userName: detail.name,
+      department: detail.department,
+      institute: detail.institute
     })
-      .then(res => res.json())
       .then(res => {
         console.log(res)
-        if (res.status === 200) {
-          setOpenSnack({ open: true, message: 'Successfully Signed-UP' })
-          setOpenDialog(true)
-        } else {
-          if (res.status === 422) {
-            // eslint-disable-next-line no-throw-literal
-            throw res.message
-          } else {
-            // eslint-disable-next-line no-throw-literal
-            throw res.message
-          }
-        }
+        dispatch(reset())
+        // if (res.status === 200) {
+        // setOpenSnack({ open: true, message: 'Successfully Signed-UP' })
+        dispatch(openSnack({ message: 'Successfully Signed-UP', type: "success" }))
+        setOpenDialog(true)
+        // } else {
+        //   if (res.status === 422) {
+        //     // eslint-disable-next-line no-throw-literal
+        //     throw res.message
+        //   } else {
+        //     // eslint-disable-next-line no-throw-literal
+        //     throw res.message
+        //   }
+        // }
       })
       .catch(err => {
-        console.log(err)
-        setOpenSnack({ open: true, message: err })
+        console.error(err)
+        console.log(err.response.data.message)
+        dispatch(reset())
+        // setOpenSnack({ open: true, message: err.response.data.message })
+        dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       })
   }
 
@@ -208,13 +211,13 @@ export default function SignUp() {
       <Box className={classes.main}>
         <img className={classes.blob1} src={Blob2} alt="Blob1" />
         <img className={classes.blob2} src={Blob2} alt="Blob2" />
-        <Snackbar
+        {/* <Snackbar
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           open={openSnack.open}
           onClose={() => setOpenSnack({ ...openSnack, open: false })}
           message={openSnack.message}
           key={'topright'}
-        />
+        /> */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)} aria-labelledby="form-dialog-title">
           <DialogTitle id="form-dialog-title">E-Mail Verification</DialogTitle>
           <DialogContent>
@@ -281,7 +284,7 @@ export default function SignUp() {
                 <OutlinedInput
                   id="password"
                   label="Password"
-                  margin="normal"
+                  // margin="normal"
                   type={showPass ? 'text' : 'password'}
                   required
                   error={checkPass}
@@ -303,12 +306,12 @@ export default function SignUp() {
                 />
               </FormControl>
 
-              <FormControl style={{ margin: "0.5em 0" }} fullWidth variant='outlined'>
+              <FormControl style={{ margin: "0.5em 0 0 0" }} fullWidth variant='outlined'>
                 <InputLabel error={checkCPass} htmlFor="Cpassword">Confirm Password</InputLabel>
                 <OutlinedInput
                   id="Cpassword"
                   label="Confirm Password"
-                  margin="normal"
+                  // margin="normal"
                   type={showCPass ? 'text' : 'password'}
                   required
                   fullWidth
@@ -329,7 +332,7 @@ export default function SignUp() {
                   }
                 />
               </FormControl>
-              <FormControl fullWidth required variant="outlined" className={classes.formControl}>
+              <FormControl fullWidth required style={{ margin: "0.5em 0 0 0" }} variant="outlined" className={classes.formControl}>
                 <InputLabel id="demo-simple-select-outlined-label">Role</InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
@@ -343,9 +346,48 @@ export default function SignUp() {
                   </MenuItem>
                   <MenuItem value={"student"}>Student</MenuItem>
                   <MenuItem value={"faculty"}>Faculty</MenuItem>
-                  <MenuItem value={"alumini"}>Alumini</MenuItem>
-                  <MenuItem value={"employer"}>Employer</MenuItem>
+                  {/* <MenuItem value={"alumini"}>Alumini</MenuItem> */}
+                  {/* <MenuItem value={"employer"}>Employer</MenuItem> */}
                   <MenuItem value={"admin"}>Admin</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth required style={{ margin: "0.5em 0" }} variant="outlined" className={classes.formControl}>
+                <InputLabel id="demo-simple-select-outlined-label">Institute</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={detail.institute}
+                  onChange={handleChange('institute')}
+                  label="Institute"
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value={"CSPIT"}>CSPIT</MenuItem>
+                  <MenuItem value={"DEPSTAR"}>DEPSTAR</MenuItem>
+                  {/* <MenuItem value={"alumini"}>I2IM</MenuItem>
+                  <MenuItem value={"employer"}>PDPIAS</MenuItem>
+                  <MenuItem value={"admin"}>RPCP</MenuItem> */}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth required variant="outlined" className={classes.formControl}>
+                <InputLabel id="demo-simple-select-outlined-label">Department</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={detail.department}
+                  onChange={handleChange('department')}
+                  label="Department"
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value={"IT"}>IT</MenuItem>
+                  <MenuItem value={"CE"}>CE</MenuItem>
+                  <MenuItem value={"EC"}>EC</MenuItem>
+                  <MenuItem value={"CL"}>CL</MenuItem>
+                  <MenuItem value={"EE"}>EE</MenuItem>
+                  <MenuItem value={"ME"}>ME</MenuItem>
                 </Select>
               </FormControl>
               <Button
