@@ -24,8 +24,8 @@ export default function NewFeedback() {
     })
       .then(res => res.json())
       .then(res => {
-        console.log(res.data)
-        setFeedbacks(res.data)
+        console.log(res)
+        setFeedbacks(res)
       })
       .catch(err => console.log(err))
   }, [])
