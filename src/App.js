@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import axios from 'axios'
 import { Switch, Route, Redirect, useHistory, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from "react-redux";
+import { userInfo, loggin } from "./redux/reducers/userSlice";
 import { Backdrop, CircularProgress, Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 import { makeStyles } from '@material-ui/core/styles';
@@ -11,7 +13,7 @@ import Dashboard from './components/Dashboard/Dashboard'
 
 const useStyles = makeStyles((theme) => ({
   backdrop: {
-    zIndex: theme.zIndex.drawer + 10,
+    zIndex: theme.zIndex.drawer + 1000,
     color: '#fff',
   },
 }));
@@ -42,12 +44,36 @@ function App() {
   const isLoading = useSelector((state) => state.loading.isLoading)
 
   useEffect(() => {
+    let push
     if (localStorage.getItem('token')) {
       if (JSON.parse(localStorage.getItem('user')).role === 'admin') {
-        history.push('/dashboard');
+        push = '/dashboard'
       } else {
-        history.push('/feedback');
+        push = '/feedback'
       }
+      const id = JSON.parse(localStorage.getItem('user'))._id
+      axios.get(`https://sgp-feedback-system.herokuapp.com/api/user?id=${id}`)
+        .then((res) => {
+          // console.log(res)
+          localStorage.clear()
+          localStorage.setItem("user", JSON.stringify(res.data));
+          localStorage.setItem("token", JSON.stringify(res.data.token));
+          dispatch(
+            userInfo({
+              userName: res.data.userName,
+              email: res.data.email,
+              isVerified: res.data.isVerified,
+              role: res.data.role,
+              institute: res.data.institute,
+              department: res.data.department,
+              id: res.data._id,
+              avatar: res.data.avatar
+            })
+          );
+          dispatch(loggin());
+          history.push(push)
+        }).catch((err) => console.log(err))
+
     }
     // eslint-disable-next-line
   }, [])
@@ -70,6 +96,7 @@ function App() {
           {snackMsg}
         </Alert>
       </Snackbar>
+
       <Switch location={location}>
         <Route exact path='/'><SignIn /></Route>
         <Route exact path='/signup'><SignUp /></Route>

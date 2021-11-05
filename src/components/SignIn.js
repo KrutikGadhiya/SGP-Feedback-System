@@ -233,7 +233,11 @@ export default function SignIn() {
             userName: res.data.userName,
             email: res.data.email,
             isVerified: res.data.isVerified,
-            role: res.data.role
+            role: res.data.role,
+            institute: res.data.institute,
+            department: res.data.department,
+            id: res.data._id,
+            avatar: res.data.avatar
           })
         );
         dispatch(loggin());
