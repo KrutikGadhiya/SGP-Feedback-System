@@ -86,6 +86,8 @@ const Form = props => {
   }
 
   const handleSubmit = async () => {
+    // console.log(feedback, Number(feedback.sem))
+    // return
     if (!isFormValid()) {
       return dispatch(openSnack({ message: 'Please Enter the Correct Values', type: "error" }))
     }
@@ -98,8 +100,8 @@ const Form = props => {
         name: feedback.name,
         description: feedback.desc,
         feedbackFor: {
-          sem: feedback.sem,
-          year: feedback.year,
+          sem: Number(feedback.sem),
+          year: Number(feedback.year),
           institute: feedback.inst,
           department: feedback.depart
         },
