@@ -237,6 +237,7 @@ export default function SignIn() {
             institute: res.data.institute,
             department: res.data.department,
             id: res.data._id,
+            token: res.data.token,
             avatar: res.data.avatar
           })
         );

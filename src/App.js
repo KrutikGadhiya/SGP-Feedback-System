@@ -42,6 +42,7 @@ function App() {
   const snackMsg = useSelector((state) => state.snack.message)
   const snackType = useSelector((state) => state.snack.type)
   const isLoading = useSelector((state) => state.loading.isLoading)
+  // const JWTtoken = useSelector((state) => state.user.token)
 
   useEffect(() => {
     let push
@@ -52,12 +53,18 @@ function App() {
         push = '/feedback'
       }
       const id = JSON.parse(localStorage.getItem('user'))._id
-      axios.get(`https://sgp-feedback-system.herokuapp.com/api/user?id=${id}`)
+      const token = localStorage.getItem('token').slice(1, -1)
+      console.log(token)
+      axios.get(`https://sgp-feedback-system.herokuapp.com/api/user?id=${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
         .then((res) => {
           // console.log(res)
-          localStorage.clear()
+          // localStorage.clear()
           localStorage.setItem("user", JSON.stringify(res.data));
-          localStorage.setItem("token", JSON.stringify(res.data.token));
+          // localStorage.setItem("token", token);
           dispatch(
             userInfo({
               userName: res.data.userName,
@@ -67,6 +74,7 @@ function App() {
               institute: res.data.institute,
               department: res.data.department,
               id: res.data._id,
+              token: token,
               avatar: res.data.avatar
             })
           );
@@ -101,10 +109,11 @@ function App() {
         <Route exact path='/'><SignIn /></Route>
         <Route exact path='/signup'><SignUp /></Route>
         <ProtecedRoute exact path='/dashboard'><Dashboard home /></ProtecedRoute>
-        <ProtecedRoute exact path='/user'><Dashboard user /></ProtecedRoute>
+        <ProtecedRoute exact path='/addQue'><Dashboard addQue /></ProtecedRoute>
         <ProtecedRoute exact path='/feedback'><Dashboard newfeedback /></ProtecedRoute>
         <ProtecedRoute exact path='/students'><Dashboard students /></ProtecedRoute>
         <ProtecedRoute exact path='/settings'><Dashboard settings /></ProtecedRoute>
+        <ProtecedRoute exact path='/submitFeed'><Dashboard submitFeed /></ProtecedRoute>
       </Switch>
     </div>
   );

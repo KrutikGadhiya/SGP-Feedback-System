@@ -40,9 +40,19 @@ const styles = makeStyles(theme => ({
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2)
   },
-  input1: {
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2)
+  addBtn: {
+    background: '#eef',
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
+  removeBtn: {
+    background: '#fee',
+    // marginLeft: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+    marginTop: theme.spacing(1)
+  },
+  inputWithBtn: {
+    marginBottom: theme.spacing(1)
   }
 }));
 
@@ -51,7 +61,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreateNewFeedback = (props) => {
+const CreateNewTemplate = (props) => {
   const classes = styles();
   const newFeedbackRef = useRef()
   const dialogRef = useRef()
@@ -74,6 +84,8 @@ const CreateNewFeedback = (props) => {
         aria-labelledby="customized-dialog-title"
         open={open}
         // fullScreen
+        fullWidth
+        maxWidt='sm'
         ref={dialogRef}
         disableEscapeKeyDown
         TransitionComponent={Transition}
@@ -125,4 +137,4 @@ const CreateNewFeedback = (props) => {
   );
 };
 
-export default CreateNewFeedback;
+export default CreateNewTemplate;

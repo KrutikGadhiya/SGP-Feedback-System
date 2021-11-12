@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
+  AppBar,
+  Box,
   FormControl,
   Grid,
   InputLabel,
   MenuItem,
   Select,
+  Tab,
+  Tabs,
   Typography,
   TextField,
 } from '@material-ui/core';
@@ -20,27 +24,65 @@ const addDays = (date, days) => {
   return newDate;
 }
 
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
 const Form = props => {
   const { classes } = props;
   const dispatch = useDispatch()
   const userId = useSelector((state) => state.user.id)
+  const JWTtoken = useSelector((state) => state.user.token)
   const [feedback, setFeedback] = useState({
     name: '', desc: '', dueFrom: null, dueTo: null, feedbackFor: '', feedbackQue: '', sem: 0, year: new Date().getFullYear(), inst: '', depart: '', feedbackOf: ''
   })
   const [facultyLst, setFacultyLst] = useState([])
+  const [courseLst, setCourseLst] = useState([])
   const [questionLst, setQuestionLst] = useState([])
   const [errors, setErrors] = useState({})
+  const [value, setValue] = React.useState(0);
   const instCSPIT = ['IT', 'CE', 'EC', 'EE', 'ME', 'CL']
   const instDEPSTAR = ['IT', 'CE', 'CSE']
 
   useEffect(() => {
-    axios.get('https://sgp-feedback-system.herokuapp.com/api/faculty').then((res) => {
+    axios.get('https://sgp-feedback-system.herokuapp.com/api/faculty', {
+      headers: {
+        Authorization: `Bearer ${JWTtoken}`
+      }
+    }).then((res) => {
       setFacultyLst(res.data)
     })
-    axios.get('https://sgp-feedback-system.herokuapp.com/api/getfeedbackque').then((res) => {
+    axios.get('https://sgp-feedback-system.herokuapp.com/api/courses', {
+      headers: {
+        Authorization: `Bearer ${JWTtoken}`
+      }
+    }).then((res) => {
+      setCourseLst(res.data)
+    })
+    axios.get('https://sgp-feedback-system.herokuapp.com/api/getfeedbackque', {
+      headers: {
+        Authorization: `Bearer ${JWTtoken}`
+      }
+    }).then((res) => {
       setQuestionLst(res.data)
     })
-  }, [])
+  }, [JWTtoken])
 
   const handleValidation = (fieldValues) => {
     let temp = { ...errors }
@@ -96,7 +138,7 @@ const Form = props => {
 
     dispatch(set())
     try {
-      const res = await axios.post('https://sgp-feedback-system.herokuapp.com/api/newFeedback', {
+      const res = await axios.post(`https://sgp-feedback-system.herokuapp.com/api/${value === 0 ? 'newFeedback' : 'courseFeedback'}`, {
         name: feedback.name,
         description: feedback.desc,
         feedbackFor: {
@@ -110,6 +152,10 @@ const Form = props => {
         dueFrom: feedback.dueFrom,
         dueTo: feedback.dueTo,
         createdBy: userId
+      }, {
+        headers: {
+          Authorization: `Bearer ${JWTtoken}`
+        }
       })
       // console.log(res.data)
 
@@ -124,14 +170,38 @@ const Form = props => {
     }
   }
 
+  function a11yProps(index) {
+    return {
+      id: `full-width-tab-${index}`,
+      'aria-controls': `full-width-tabpanel-${index}`,
+    };
+  }
+  const handleTabChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <div ref={props.reff} onSubmit={handleSubmit}>
       <button hidden onClick={handleSubmit}>submit</button>
+      <AppBar position="static" color="default" >
+        <Tabs
+          value={value}
+          onChange={handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          aria-label="feedback tabs"
+        >
+          <Tab label="Faculty Feedback" {...a11yProps(0)} />
+          <Tab label="Course Feedback" {...a11yProps(1)} />
+        </Tabs>
+      </AppBar>
+      {/* <h1></h1> */}
       <TextField
         label="Name"
         fullWidth
         variant="outlined"
-        className={classes.input}
+        className={classes.input1}
         value={feedback.name}
         onBlur={handleChange('name')}
         onChange={handleChange('name')}
@@ -234,24 +304,46 @@ const Form = props => {
           </FormControl>
         </Grid>
       </Grid>
-      <FormControl fullWidth style={{ margin: "0 0 1em 0" }} variant="outlined" className={classes.formControl}>
-        <InputLabel id="FeedbackOf">Feedback Of faculty</InputLabel>
-        <Select
-          labelId="FeedbackOf"
-          value={feedback.feedbackOf}
-          onBlur={handleChange('feedbackOf')}
-          onChange={handleChange('feedbackOf')}
-          label="Feedback Of"
-          {...(errors["feedbackOf"] && { error: true, helperText: errors["feedbackOf"] })}
-        >
-          <MenuItem value=""><em>None</em></MenuItem>
-          {
-            facultyLst.map((item) => (
-              <MenuItem value={item.id} key={item.id}>{item.userName}</MenuItem>
-            ))
-          }
-        </Select>
-      </FormControl>
+      <TabPanel value={value} index={0}>
+        <FormControl fullWidth style={{ margin: "0 0 1em 0" }} variant="outlined" className={classes.formControl}>
+          <InputLabel id="FeedbackOf">Feedback Of Faculty</InputLabel>
+          <Select
+            labelId="FeedbackOf"
+            value={feedback.feedbackOf}
+            onBlur={handleChange('feedbackOf')}
+            onChange={handleChange('feedbackOf')}
+            label="Feedback Of"
+            {...(errors["feedbackOf"] && { error: true, helperText: errors["feedbackOf"] })}
+          >
+            <MenuItem value=""><em>None</em></MenuItem>
+            {
+              facultyLst.map((item) => (
+                <MenuItem value={item.id} key={item.id}>{item.userName}</MenuItem>
+              ))
+            }
+          </Select>
+        </FormControl>
+      </TabPanel>
+      <TabPanel value={value} index={1}>
+        <FormControl fullWidth style={{ margin: "0 0 1em 0" }} variant="outlined" className={classes.formControl}>
+          <InputLabel id="FeedbackOf">Feedback Of Course</InputLabel>
+          <Select
+            labelId="FeedbackOf"
+            value={feedback.feedbackOf}
+            onBlur={handleChange('feedbackOf')}
+            onChange={handleChange('feedbackOf')}
+            label="Feedback Of"
+            {...(errors["feedbackOf"] && { error: true, helperText: errors["feedbackOf"] })}
+          >
+            <MenuItem value=""><em>None</em></MenuItem>
+            {
+              courseLst.map((item) => (
+                <MenuItem value={item._id} key={item._id}>{item.name + ' '} ({item.courseId})</MenuItem>
+              ))
+            }
+          </Select>
+        </FormControl>
+      </TabPanel>
       <FormControl fullWidth style={{ margin: "0 0 1em 0" }} variant="outlined" className={classes.formControl}>
         <InputLabel id="feedbackQue">Feedback Question's</InputLabel>
         <Select

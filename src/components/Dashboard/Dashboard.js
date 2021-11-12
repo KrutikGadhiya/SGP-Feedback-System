@@ -22,14 +22,15 @@ import {
 } from "@material-ui/core";
 
 import AccountCircle from "@material-ui/icons/AccountCircle";
-import { PersonOutlineOutlined, HomeOutlined, AddCircleOutlineOutlined, SettingsOutlined, PeopleOutlineOutlined } from "@material-ui/icons"
+import { HomeOutlined, AddCircleOutlineOutlined, SettingsOutlined, PeopleOutlineOutlined, SpeakerNotes } from "@material-ui/icons"
 import MenuIcon from "@material-ui/icons/Menu";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useHistory, useLocation } from "react-router-dom";
 import Home from './Home/Home';
-import User from './User';
+import AddQueList from './AddQueTemplateList/AddQueList';
 import Settings from './Settings';
 import Students from './Students';
+import SubmitFeed from '../Dashboard/NewFeedback/SubmitFeed'
 import NewFeedback from './NewFeedback/NewFeedback'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../redux/reducers/userSlice'
@@ -118,7 +119,7 @@ function ResponsiveDrawer(props) {
 
   const listItems = role === "admin" || JSON.parse(localStorage.getItem('user')).role === 'admin' ? [
     { text: "Home", icon: <HomeOutlined />, path: "/dashboard" },
-    { text: "User", icon: <PersonOutlineOutlined />, path: "/user" },
+    { text: "Add Question List", icon: <SpeakerNotes />, path: "/addQue" },
     { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/feedback" },
     { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
     { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
@@ -234,10 +235,11 @@ function ResponsiveDrawer(props) {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           {props.home ? <Home /> : <></>}
-          {props.user ? <User /> : <></>}
+          {props.addQue ? <AddQueList /> : <></>}
           {props.students ? <Students /> : <></>}
           {props.settings ? <Settings /> : <></>}
           {props.newfeedback ? <NewFeedback /> : <></>}
+          {props.submitFeed ? <SubmitFeed /> : <></>}
         </main>
       </Box>
       <Dialog

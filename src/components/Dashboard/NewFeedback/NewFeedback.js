@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import CreateNewFeedback from './CreateNewFeedback'
-import { Box, Button, Dialog, DialogActions, DialogTitle, IconButton, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core'
+import { AppBar, Box, Button, Dialog, DialogActions, DialogTitle, IconButton, Typography, Tabs, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import axios from 'axios'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { set, reset } from '../../../redux/reducers/loadingSlice'
 import { openSnack } from '../.././../redux/reducers/snackSlice'
 
@@ -16,15 +18,61 @@ const useStyle = makeStyles((theme) => ({
   },
   headText: {
     flex: 1
+  },
+  tblContainer: {
+    maxHeight: 500
   }
 }))
 
+const Feed = ({ list, setDelId, setConfirmation }) => {
+
+  return (
+    <TableBody>
+      {
+
+        list.map(row => {
+          let newDueFrom = new Date(row.dueFrom)
+          let newDueTo = new Date(row.dueTo)
+          return <TableRow hover key={row._id} onClick={() => console.log(row._id)}>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>{row.description}</TableCell>
+            <TableCell>{row.feedbackQuestions.name}</TableCell>
+            <TableCell>{row.createdBy.userName}</TableCell>
+            <TableCell>{row.createdBy.email}</TableCell>
+            <TableCell>{newDueFrom.toDateString()}</TableCell>
+            <TableCell>{newDueTo.toDateString()}</TableCell>
+            {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell>
+              {/* <IconButton color='secondary' onClick={() => { confirmation ? deleteFeedback(row._id) :  }} > */}
+              <IconButton color='secondary' onClick={() => {
+                setDelId(row._id)
+                setConfirmation(true)
+              }} >
+                <DeleteOutlinedIcon />
+              </IconButton>
+            </TableCell>}
+            {JSON.parse(localStorage.getItem('user')).role.toLowerCase() === "student" && <TableCell>
+              {/* <IconButton color='secondary' onClick={() => { confirmation ? deleteFeedback(row._id) :  }} > */}
+              <Link to={`/submitFeed?fid=${row._id}&qid=${row.feedbackQuestions._id}`}><IconButton color='primary'>
+                <OpenInNewIcon />
+              </IconButton>
+              </Link>
+            </TableCell>}
+          </TableRow>
+        })
+      }
+    </TableBody>
+  )
+}
+
 export default function NewFeedback() {
   const dispatch = useDispatch()
+  const JWTtoken = useSelector((state) => state.user.token)
   const classes = useStyle()
   const [feedbacks, setFeedbacks] = useState([]);
+  const [courseFeedbacks, setCourseFeedbacks] = useState([]);
   const [delId, setDelId] = useState('');
   const [confirmation, setConfirmation] = useState(false);
+  const [value, setValue] = useState(0)
 
   const handleConfirmation = () => {
     setConfirmation(false)
@@ -33,7 +81,11 @@ export default function NewFeedback() {
   const getFeedbackList = useCallback(async () => {
     dispatch(set())
     try {
-      const res = await axios.get('https://sgp-feedback-system.herokuapp.com/api/getfeedbacklist')
+      const res = await axios.get('https://sgp-feedback-system.herokuapp.com/api/getfeedbacklist', {
+        headers: {
+          Authorization: `Bearer ${JWTtoken}`
+        }
+      })
       setFeedbacks(res.data)
       dispatch(reset())
     } catch (err) {
@@ -41,16 +93,37 @@ export default function NewFeedback() {
       dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       dispatch(reset())
     }
-  }, [dispatch])
+  }, [dispatch, JWTtoken])
+  const getCourseFeedbackList = useCallback(async () => {
+    dispatch(set())
+    try {
+      const res = await axios.get('https://sgp-feedback-system.herokuapp.com/api/courseFeedback', {
+        headers: {
+          Authorization: `Bearer ${JWTtoken}`
+        }
+      })
+      setCourseFeedbacks(res.data)
+      dispatch(reset())
+    } catch (err) {
+      console.log(err)
+      dispatch(openSnack({ message: err.response.data.message, type: "error" }))
+      dispatch(reset())
+    }
+  }, [dispatch, JWTtoken])
 
   useEffect(() => {
     getFeedbackList()
-  }, [getFeedbackList])
+    getCourseFeedbackList()
+  }, [getFeedbackList, getCourseFeedbackList])
 
   const deleteFeedback = async (id) => {
     dispatch(set())
     try {
-      const res = await axios.delete(`https://sgp-feedback-system.herokuapp.com/api/feedback?id=${id}`)
+      const res = await axios.delete(`https://sgp-feedback-system.herokuapp.com/api/feedback?id=${id}`, {
+        headers: {
+          Authorization: `Bearer ${JWTtoken}`
+        }
+      })
       // console.log(res)
       dispatch(openSnack({ message: res.data.message, type: "success" }))
       dispatch(reset())
@@ -63,6 +136,16 @@ export default function NewFeedback() {
     }
   }
 
+  function a11yProps(index) {
+    return {
+      id: `full-width-tab-${index}`,
+      'aria-controls': `full-width-tabpanel-${index}`,
+    };
+  }
+  const handleTabChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (<>
     <Box>
       {JSON.parse(localStorage.getItem('user')).role === "admin" ? (<Box className={classes.heading}>
@@ -74,8 +157,21 @@ export default function NewFeedback() {
         </Typography>
         <CreateNewFeedback getFeedList={getFeedbackList} />
       </Box>) : <></>}
-      <TableContainer component={Paper}>
-        <Table>
+      <AppBar position="static" color="default" >
+        <Tabs
+          value={value}
+          onChange={handleTabChange}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="fullWidth"
+          aria-label="feedback tabs"
+        >
+          <Tab label="Faculty Feedback" {...a11yProps(0)} />
+          <Tab label="Course Feedback" {...a11yProps(1)} />
+        </Tabs>
+      </AppBar>
+      <TableContainer component={Paper} className={classes.tblContainer}>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
@@ -85,35 +181,41 @@ export default function NewFeedback() {
               <TableCell>Email</TableCell>
               <TableCell>Due From</TableCell>
               <TableCell>Due To</TableCell>
-              <TableCell><Typography color='secondary'>delete</Typography></TableCell>
+              {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell><Typography color='secondary'>delete</Typography></TableCell>}
+              {JSON.parse(localStorage.getItem('user')).role !== "admin" && <TableCell><Typography>Give Feedback</Typography></TableCell>}
             </TableRow>
           </TableHead>
-          <TableBody>
-            {
-              feedbacks.map(row => {
-                let newDueFrom = new Date(row.dueFrom)
-                let newDueTo = new Date(row.dueTo)
-                return <TableRow key={row._id}>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.description}</TableCell>
-                  <TableCell>{row.feedbackQuestions.name}</TableCell>
-                  <TableCell>{row.createdBy.userName}</TableCell>
-                  <TableCell>{row.createdBy.email}</TableCell>
-                  <TableCell>{newDueFrom.toDateString()}</TableCell>
-                  <TableCell>{newDueTo.toDateString()}</TableCell>
-                  <TableCell>
-                    {/* <IconButton color='secondary' onClick={() => { confirmation ? deleteFeedback(row._id) :  }} > */}
-                    <IconButton color='secondary' onClick={() => {
-                      setDelId(row._id)
-                      setConfirmation(true)
-                    }} >
-                      <DeleteOutlinedIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              })
-            }
-          </TableBody>
+          <Feed
+            list={value === 0 ? feedbacks : courseFeedbacks}
+            setDelId={delId => setDelId(delId)}
+            setConfirmation={confirmation => setConfirmation(confirmation)}
+          />
+          {/* <TableBody> */}
+          {
+            // feedbacks.map(row => {
+            //   let newDueFrom = new Date(row.dueFrom)
+            //   let newDueTo = new Date(row.dueTo)
+            //   return <TableRow key={row._id}>
+            //     <TableCell>{row.name}</TableCell>
+            //     <TableCell>{row.description}</TableCell>
+            //     <TableCell>{row.feedbackQuestions.name}</TableCell>
+            //     <TableCell>{row.createdBy.userName}</TableCell>
+            //     <TableCell>{row.createdBy.email}</TableCell>
+            //     <TableCell>{newDueFrom.toDateString()}</TableCell>
+            //     <TableCell>{newDueTo.toDateString()}</TableCell>
+            //     <TableCell>
+            //       {/* <IconButton color='secondary' onClick={() => { confirmation ? deleteFeedback(row._id) :  }} > */}
+            //       <IconButton color='secondary' onClick={() => {
+            //         setDelId(row._id)
+            //         setConfirmation(true)
+            //       }} >
+            //         <DeleteOutlinedIcon />
+            //       </IconButton>
+            //     </TableCell>
+            //   </TableRow>
+            // })
+          }
+          {/* </TableBody> */}
         </Table>
       </TableContainer>
     </Box>
