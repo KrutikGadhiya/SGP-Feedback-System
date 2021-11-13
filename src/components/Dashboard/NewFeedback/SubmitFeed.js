@@ -32,7 +32,7 @@ export default function SubmitFeed() {
   const query = useQuery()
   const classes = useStyle()
   const dispatch = useDispatch()
-  const userId = useSelector((state) => state.user.id)
+  // const userId = useSelector((state) => state.user.id)
   const JWTtoken = useSelector((state) => state.user.token)
   const [feedQue, setFeedQue] = useState([])
 
