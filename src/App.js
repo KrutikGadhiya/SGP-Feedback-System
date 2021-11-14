@@ -50,7 +50,10 @@ function App() {
       if (JSON.parse(localStorage.getItem('user')).role === 'admin') {
         push = '/dashboard'
       } else {
-        push = '/feedback'
+        if (JSON.parse(localStorage.getItem('user')).role === 'student')
+          push = '/feedback'
+        else
+          push = '/analytics'
       }
       const id = JSON.parse(localStorage.getItem('user'))._id
       const token = localStorage.getItem('token').slice(1, -1)
@@ -75,7 +78,9 @@ function App() {
               department: res.data.department,
               id: res.data._id,
               token: token,
-              avatar: res.data.avatar
+              avatar: res.data.avatar,
+              sem: res.data.sem,
+              year: res.data.year
             })
           );
           dispatch(loggin());
@@ -112,7 +117,7 @@ function App() {
         <ProtecedRoute exact path='/addQue'><Dashboard addQue /></ProtecedRoute>
         <ProtecedRoute exact path='/feedback'><Dashboard newfeedback /></ProtecedRoute>
         <ProtecedRoute exact path='/students'><Dashboard students /></ProtecedRoute>
-        <ProtecedRoute exact path='/settings'><Dashboard settings /></ProtecedRoute>
+        <ProtecedRoute exact path='/analytics'><Dashboard settings /></ProtecedRoute>
         <ProtecedRoute exact path='/submitFeed'><Dashboard submitFeed /></ProtecedRoute>
       </Switch>
     </div>

@@ -238,7 +238,9 @@ export default function SignIn() {
             department: res.data.department,
             id: res.data._id,
             token: res.data.token,
-            avatar: res.data.avatar
+            avatar: res.data.avatar,
+            sem: res.data.sem,
+            year: res.data.year
           })
         );
         dispatch(loggin());

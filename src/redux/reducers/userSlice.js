@@ -8,6 +8,8 @@ const initialState = {
   role: "student",
   institute: "INST",
   department: "DEPART",
+  sem: 1,
+  year: 2021,
   id: 'asdsadasdaacsacac',
   token: 'token',
   avatar: 'https://avatars.dicebear.com/api/identicon/user.svg'
@@ -24,6 +26,8 @@ export const userSlice = createSlice({
       state.role = payload.role;
       state.institute = payload.institute;
       state.department = payload.department;
+      state.sem = payload.sem;
+      state.year = payload.year;
       state.id = payload.id;
       state.token = payload.token;
       state.avatar = payload.avatar;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Dialog,
@@ -22,13 +23,13 @@ import {
 } from "@material-ui/core";
 
 import AccountCircle from "@material-ui/icons/AccountCircle";
-import { HomeOutlined, AddCircleOutlineOutlined, SettingsOutlined, PeopleOutlineOutlined, SpeakerNotes } from "@material-ui/icons"
+import { HomeOutlined, AddCircleOutlineOutlined, PeopleOutlineOutlined, SpeakerNotes, Timeline } from "@material-ui/icons"
 import MenuIcon from "@material-ui/icons/Menu";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useHistory, useLocation } from "react-router-dom";
 import Home from './Home/Home';
 import AddQueList from './AddQueTemplateList/AddQueList';
-import Settings from './Settings';
+import Analytics from './Analytics';
 import Students from './Students';
 import SubmitFeed from '../Dashboard/NewFeedback/SubmitFeed'
 import NewFeedback from './NewFeedback/NewFeedback'
@@ -76,6 +77,9 @@ const useStyles = makeStyles((theme) => ({
   root: {
     display: "flex"
   },
+  avatar: {
+    background: '#fff'
+  },
   title: {
     flexGrow: 1,
     textAlign: "left"
@@ -88,6 +92,7 @@ function ResponsiveDrawer(props) {
   const location = useLocation()
   const dispatch = useDispatch()
   const role = useSelector((state) => state.user.role)
+  const avatar = useSelector((state) => state.user.avatar)
   const { window } = props;
   const classes = useStyles();
   const theme = useTheme();
@@ -122,9 +127,11 @@ function ResponsiveDrawer(props) {
     { text: "Add Question List", icon: <SpeakerNotes />, path: "/addQue" },
     { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/feedback" },
     { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
-    { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
-  ] : [
+    // { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
+  ] : role === "student" || JSON.parse(localStorage.getItem('user')).role === 'student' ? [
     { text: "Feedback", icon: <HomeOutlined />, path: "/feedback" },
+  ] : [
+    { text: "Analytics", icon: <Timeline />, path: "/analytics" },
   ]
 
 
@@ -182,7 +189,7 @@ function ResponsiveDrawer(props) {
               onClick={handleMobileMenuOpen}
               color="inherit"
             >
-              <AccountCircle />
+              {!avatar ? <AccountCircle /> : <Avatar className={classes.avatar} alt="user avatar" src={avatar} />}
             </IconButton>
           </div>
           <Menu
@@ -195,7 +202,7 @@ function ResponsiveDrawer(props) {
             onClose={handleMenuClose}
           >
             <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-            <MenuItem onClick={handleMenuClose}>My account</MenuItem>
+            {/* <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
             <MenuItem onClick={() => setConfirmation(true)}>Logout</MenuItem>
           </Menu>
         </Toolbar>
@@ -237,7 +244,7 @@ function ResponsiveDrawer(props) {
           {props.home ? <Home /> : <></>}
           {props.addQue ? <AddQueList /> : <></>}
           {props.students ? <Students /> : <></>}
-          {props.settings ? <Settings /> : <></>}
+          {props.settings ? <Analytics /> : <></>}
           {props.newfeedback ? <NewFeedback /> : <></>}
           {props.submitFeed ? <SubmitFeed /> : <></>}
         </main>

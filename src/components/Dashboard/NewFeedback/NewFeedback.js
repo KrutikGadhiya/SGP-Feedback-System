@@ -33,12 +33,14 @@ const Feed = ({ list, setDelId, setConfirmation }) => {
         list.map(row => {
           let newDueFrom = new Date(row.dueFrom)
           let newDueTo = new Date(row.dueTo)
-          return <TableRow hover key={row._id} onClick={() => console.log(row._id)}>
+          return <TableRow hover key={row._id}>
             <TableCell>{row.name}</TableCell>
             <TableCell>{row.description}</TableCell>
-            <TableCell>{row.feedbackQuestions.name}</TableCell>
+            {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell>{row.feedbackQuestions.name}</TableCell>}
             <TableCell>{row.createdBy.userName}</TableCell>
-            <TableCell>{row.createdBy.email}</TableCell>
+            {
+              JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell>{row.createdBy.email}</TableCell>
+            }
             <TableCell>{newDueFrom.toDateString()}</TableCell>
             <TableCell>{newDueTo.toDateString()}</TableCell>
             {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell>
@@ -67,12 +69,20 @@ const Feed = ({ list, setDelId, setConfirmation }) => {
 export default function NewFeedback() {
   const dispatch = useDispatch()
   const JWTtoken = useSelector((state) => state.user.token)
+  const role = useSelector((state) => state.user.role)
+  const sem = useSelector((state) => state.user.sem)
+  // const year = useSelector((state) => state.user.year)
+  const inst = useSelector((state) => state.user.institute)
+  const depart = useSelector((state) => state.user.department)
   const classes = useStyle()
   const [feedbacks, setFeedbacks] = useState([]);
   const [courseFeedbacks, setCourseFeedbacks] = useState([]);
   const [delId, setDelId] = useState('');
   const [confirmation, setConfirmation] = useState(false);
   const [value, setValue] = useState(0)
+
+  const courseFeedURL = role === 'admin' ? `https://sgp-feedback-system.herokuapp.com/api/courseFeedback` : `https://sgp-feedback-system.herokuapp.com/api/courseFeedback?sem=${sem}&institute=${inst}&department=${depart}`
+  const feedURL = role === 'admin' ? `https://sgp-feedback-system.herokuapp.com/api/getfeedbacklist` : `https://sgp-feedback-system.herokuapp.com/api/getfeedbacklist?sem=${sem}&institute=${inst}&department=${depart}`
 
   const handleConfirmation = () => {
     setConfirmation(false)
@@ -81,7 +91,7 @@ export default function NewFeedback() {
   const getFeedbackList = useCallback(async () => {
     dispatch(set())
     try {
-      const res = await axios.get('https://sgp-feedback-system.herokuapp.com/api/getfeedbacklist', {
+      const res = await axios.get(feedURL, {
         headers: {
           Authorization: `Bearer ${JWTtoken}`
         }
@@ -93,11 +103,11 @@ export default function NewFeedback() {
       dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       dispatch(reset())
     }
-  }, [dispatch, JWTtoken])
+  }, [dispatch, JWTtoken, feedURL])
   const getCourseFeedbackList = useCallback(async () => {
     dispatch(set())
     try {
-      const res = await axios.get('https://sgp-feedback-system.herokuapp.com/api/courseFeedback', {
+      const res = await axios.get(courseFeedURL, {
         headers: {
           Authorization: `Bearer ${JWTtoken}`
         }
@@ -109,7 +119,7 @@ export default function NewFeedback() {
       dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       dispatch(reset())
     }
-  }, [dispatch, JWTtoken])
+  }, [dispatch, JWTtoken, courseFeedURL])
 
   useEffect(() => {
     getFeedbackList()
@@ -176,9 +186,9 @@ export default function NewFeedback() {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Description</TableCell>
-              <TableCell>Feedback Question</TableCell>
+              {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell>Feedback Question</TableCell>}
               <TableCell>Created By</TableCell>
-              <TableCell>Email</TableCell>
+              {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell>Email</TableCell>}
               <TableCell>Due From</TableCell>
               <TableCell>Due To</TableCell>
               {JSON.parse(localStorage.getItem('user')).role === "admin" && <TableCell><Typography color='secondary'>delete</Typography></TableCell>}
