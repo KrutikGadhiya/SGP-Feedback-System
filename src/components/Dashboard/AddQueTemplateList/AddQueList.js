@@ -4,7 +4,7 @@ import { Box, Button, Dialog, DialogActions, DialogTitle, IconButton, Typography
 import { makeStyles } from '@material-ui/core/styles'
 import DeleteOutlinedIcon from '@material-ui/icons/DeleteOutlined';
 import axios from 'axios'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { set, reset } from '../../../redux/reducers/loadingSlice'
 import { openSnack } from '../.././../redux/reducers/snackSlice'
 
@@ -21,7 +21,8 @@ const useStyle = makeStyles((theme) => ({
 
 export default function AddQueList() {
   const dispatch = useDispatch()
-  const JWTtoken = useSelector((state) => state.user.token)
+  // const JWTtoken = useSelector((state) => state.user.token)
+  const JWTtoken = localStorage.getItem('token').slice(1, -1)
   const classes = useStyle()
   const [feedbacks, setFeedbacks] = useState([]);
   const [delId, setDelId] = useState('');

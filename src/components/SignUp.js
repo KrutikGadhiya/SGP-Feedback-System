@@ -346,9 +346,9 @@ export default function SignUp() {
                   </MenuItem>
                   <MenuItem value={"student"}>Student</MenuItem>
                   <MenuItem value={"faculty"}>Faculty</MenuItem>
-                  {/* <MenuItem value={"alumini"}>Alumini</MenuItem> */}
+                  <MenuItem disabled value={"alumini"}>Alumini</MenuItem>
                   {/* <MenuItem value={"employer"}>Employer</MenuItem> */}
-                  <MenuItem value={"admin"}>Admin</MenuItem>
+                  <MenuItem disabled value={"admin"}>Admin</MenuItem>
                 </Select>
               </FormControl>
               <FormControl fullWidth required style={{ margin: "0.5em 0" }} variant="outlined" className={classes.formControl}>

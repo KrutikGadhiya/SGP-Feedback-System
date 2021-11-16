@@ -68,7 +68,8 @@ const Feed = ({ list, setDelId, setConfirmation }) => {
 
 export default function NewFeedback() {
   const dispatch = useDispatch()
-  const JWTtoken = useSelector((state) => state.user.token)
+  // const JWTtoken = useSelector((state) => state.user.token)
+  const JWTtoken = localStorage.getItem('token').slice(1, -1)
   const role = useSelector((state) => state.user.role)
   const sem = useSelector((state) => state.user.sem)
   // const year = useSelector((state) => state.user.year)

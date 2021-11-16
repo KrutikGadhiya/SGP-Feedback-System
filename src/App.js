@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Switch, Route, Redirect, useHistory, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from "react-redux";
@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
   backdrop: {
     zIndex: theme.zIndex.drawer + 1000,
     color: '#fff',
-  },
+  }
 }));
 
 function ProtecedRoute(props) {
@@ -42,6 +42,7 @@ function App() {
   const snackMsg = useSelector((state) => state.snack.message)
   const snackType = useSelector((state) => state.snack.type)
   const isLoading = useSelector((state) => state.loading.isLoading)
+  const [isReq, setIsReq] = useState(true)
   // const JWTtoken = useSelector((state) => state.user.token)
 
   useEffect(() => {
@@ -85,13 +86,17 @@ function App() {
           );
           dispatch(loggin());
           history.push(push)
+          setIsReq(false)
         }).catch((err) => console.log(err))
-
+    } else {
+      setIsReq(false)
     }
-    // eslint-disable-next-line
-  }, [])
+  }, [dispatch, history])
   return (
     <div>
+      {/* <Backdrop className={classes.request} open={isReq}>
+        <CircularProgress color='inherit' />
+      </Backdrop> */}
       <Backdrop className={classes.backdrop} open={isLoading}>
         <CircularProgress color='inherit' />
       </Backdrop>
@@ -111,8 +116,9 @@ function App() {
       </Snackbar>
 
       <Switch location={location}>
-        <Route exact path='/'><SignIn /></Route>
+        <Route exact path='/'><SignIn isReq={isReq} /></Route>
         <Route exact path='/signup'><SignUp /></Route>
+        <ProtecedRoute exact path='/profile'><Dashboard profile /></ProtecedRoute>
         <ProtecedRoute exact path='/dashboard'><Dashboard home /></ProtecedRoute>
         <ProtecedRoute exact path='/addQue'><Dashboard addQue /></ProtecedRoute>
         <ProtecedRoute exact path='/feedback'><Dashboard newfeedback /></ProtecedRoute>

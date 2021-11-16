@@ -42,6 +42,10 @@ const useStyle = makeStyles((theme) => ({
   margin: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1)
+  },
+  nofeed: {
+    display: 'flex',
+    justifyContent: 'center'
   }
 }))
 
@@ -53,7 +57,8 @@ export default function Settings() {
 
   const dispatch = useDispatch()
   const id = useSelector((state) => state.user.id)
-  const JWTtoken = useSelector((state) => state.user.token)
+  // const JWTtoken = useSelector((state) => state.user.token)
+  const JWTtoken = localStorage.getItem('token').slice(1, -1)
   const dialogRef = useRef()
   const [feeds, setFeeds] = useState([])
   const [open, setOpen] = useState(false);
@@ -103,14 +108,17 @@ export default function Settings() {
         </Typography>
       </Box>
       {
-        feeds.map((feed, i) => {
-          return (
-            <Box className={classes.box} key={i} onClick={e => handleShowChart(feed.questions, feed.analytics, feed.feedFor)}>
-              {/* <Chart label={feed.} /> */}
-              <Typography variant='h6' >{feed.feedFor}</Typography>
-            </Box>
-          )
-        })
+        feeds.length !== 0 ? (
+          feeds.map((feed, i) => {
+            return (
+              <Box className={classes.box} key={i} onClick={e => handleShowChart(feed.questions, feed.analytics, feed.feedFor)}>
+                {/* <Chart label={feed.} /> */}
+                <Typography variant='h6' >{feed.feedFor}</Typography>
+              </Box>
+            )
+          })) : (<Box className={classes.nofeed}>
+            <Typography variant='h6'>No feed Found</Typography>
+          </Box>)
       }
       {/* {JSON.stringify(feeds)} */}
       <Dialog

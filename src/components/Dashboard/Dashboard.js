@@ -23,7 +23,7 @@ import {
 } from "@material-ui/core";
 
 import AccountCircle from "@material-ui/icons/AccountCircle";
-import { HomeOutlined, AddCircleOutlineOutlined, PeopleOutlineOutlined, SpeakerNotes, Timeline } from "@material-ui/icons"
+import { HomeOutlined, AddCircleOutlineOutlined, SpeakerNotes, Timeline } from "@material-ui/icons"
 import MenuIcon from "@material-ui/icons/Menu";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import { useHistory, useLocation } from "react-router-dom";
@@ -31,6 +31,7 @@ import Home from './Home/Home';
 import AddQueList from './AddQueTemplateList/AddQueList';
 import Analytics from './Analytics';
 import Students from './Students';
+import Profile from './Profile'
 import SubmitFeed from '../Dashboard/NewFeedback/SubmitFeed'
 import NewFeedback from './NewFeedback/NewFeedback'
 import { useSelector, useDispatch } from 'react-redux'
@@ -126,7 +127,7 @@ function ResponsiveDrawer(props) {
     { text: "Home", icon: <HomeOutlined />, path: "/dashboard" },
     { text: "Add Question List", icon: <SpeakerNotes />, path: "/addQue" },
     { text: "New Feedback", icon: <AddCircleOutlineOutlined />, path: "/feedback" },
-    { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
+    // { text: "Students", icon: <PeopleOutlineOutlined />, path: "/students" },
     // { text: "Settings", icon: <SettingsOutlined />, path: "/settings" },
   ] : role === "student" || JSON.parse(localStorage.getItem('user')).role === 'student' ? [
     { text: "Feedback", icon: <HomeOutlined />, path: "/feedback" },
@@ -201,7 +202,12 @@ function ResponsiveDrawer(props) {
             open={isMenuOpen}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+            <MenuItem
+              onClick={() => {
+                history.push('/profile')
+                handleMenuClose()
+              }}
+            >Profile</MenuItem>
             {/* <MenuItem onClick={handleMenuClose}>My account</MenuItem> */}
             <MenuItem onClick={() => setConfirmation(true)}>Logout</MenuItem>
           </Menu>
@@ -244,6 +250,7 @@ function ResponsiveDrawer(props) {
           {props.home ? <Home /> : <></>}
           {props.addQue ? <AddQueList /> : <></>}
           {props.students ? <Students /> : <></>}
+          {props.profile ? <Profile /> : <></>}
           {props.settings ? <Analytics /> : <></>}
           {props.newfeedback ? <NewFeedback /> : <></>}
           {props.submitFeed ? <SubmitFeed /> : <></>}

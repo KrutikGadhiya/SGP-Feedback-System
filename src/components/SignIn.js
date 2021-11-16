@@ -5,6 +5,8 @@ import {
   TextField,
   Grid,
   Box,
+  Backdrop,
+  CircularProgress,
   Typography,
   Container,
   FormControl,
@@ -131,10 +133,15 @@ const useStyles = makeStyles((theme) => ({
   },
   link: {
     cursor: "pointer"
+  },
+  request: {
+    zIndex: theme.zIndex.drawer + 1000,
+    color: '#000',
+    backgroundColor: '#fff'
   }
 }));
 
-export default function SignIn() {
+export default function SignIn({ isReq }) {
   const dispatch = useDispatch();
   const classes = useStyles();
   const history = useHistory();
@@ -211,15 +218,6 @@ export default function SignIn() {
       detail
     ).then((res) => {
       console.log(res.data);
-      // let statusCode = res.status;
-      // if (
-      //   statusCode === 422 ||
-      //   statusCode === 401 ||
-      //   statusCode === 500 ||
-      //   statusCode === 404
-      // ) {
-      //   throw res.message;
-      // }
       dispatch(reset())
       if (!res.data.isVerified) {
         setOpenDialog(true);
@@ -245,18 +243,22 @@ export default function SignIn() {
         );
         dispatch(loggin());
         if (res.data.role === "admin") history.push("/dashboard");
-        else history.push("/feedback");
+        else if (res.data.role === 'student') history.push("/feedback");
+        else history.push("/analytics")
       }
     })
       .catch((err) => {
-        console.error(err);
+        console.error(err.response);
         dispatch(reset())
+        if (err.response.status === 401) {
+          setOpenDialog(true)
+        }
         // setOpenSnack({ open: true, message: err });
         dispatch(openSnack({ message: err.response.data.message, type: "error" }))
       });
   };
 
-  return (
+  return (<>
     <ThemeProvider theme={theme}>
       <Dialog
         open={openDialog}
@@ -299,99 +301,105 @@ export default function SignIn() {
           </Button>
         </DialogActions>
       </Dialog>
-      <Box className={classes.main}>
-        <img className={classes.blob1} src={Blob1} alt="Blob1" />
-        <img className={classes.blob2} src={Blob1} alt="Blob2" />
-        {/* <Snackbar
+      {isReq ? (<Backdrop className={classes.request} open={isReq}>
+        <CircularProgress color='inherit' />
+      </Backdrop>) :
+        (<>
+          <Box className={classes.main}>
+            <img className={classes.blob1} src={Blob1} alt="Blob1" />
+            <img className={classes.blob2} src={Blob1} alt="Blob2" />
+            {/* <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
           open={openSnack.open}
           onClose={() => setOpenSnack({ ...openSnack, open: false })}
           message={openSnack.message}
           key={"topright"}
         /> */}
-        <Container component="main" maxWidth="xs">
-          <div className={classes.paper}>
-            <Avatar className={classes.avatar}>
-              <AccountCircle style={{ fontSize: 30 }} />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              Sign in
-            </Typography>
-            <Box className={classes.form}>
-              <TextField
-                variant="outlined"
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                error={checkEmail}
-                autoComplete="email"
-                value={detail.email}
-                onChange={handleChange("email")}
-                autoFocus
-              />
-              <FormControl
-                style={{ margin: "0.5em 0 0 0" }}
-                fullWidth
-                variant="outlined"
-              >
-                <InputLabel error={checkPass} htmlFor="password">
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  id="password"
-                  label="Password"
-                  margin="normal"
-                  type={showPass ? "text" : "password"}
-                  required
-                  fullWidth
-                  error={checkPass}
-                  value={detail.password}
-                  onChange={handleChange("password")}
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={() => setShowPass(!showPass)}
-                        onMouseDown={handleMouseDownPassword}
-                        edge="end"
-                      >
-                        {showPass ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  }
-                />
-              </FormControl>
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-                onClick={handleSubmit}
-              >
-                Sign In
-              </Button>
-              <Grid container>
-                <Grid item xs>
-                  <Link style={{ textDecoration: "none" }} to="/forget">
-                    Forgot password?
-                  </Link>
-                </Grid>
-                <Grid item>
-                  <Link style={{ textDecoration: "none" }} to="/signup">
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
-              </Grid>
-            </Box>
-          </div>
-          <Box mt={8}>
-            <Copyright />
-          </Box>
-        </Container>
-      </Box>
+            <Container component="main" maxWidth="xs">
+              <div className={classes.paper}>
+                <Avatar className={classes.avatar}>
+                  <AccountCircle style={{ fontSize: 30 }} />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                  Sign in
+                </Typography>
+                <Box className={classes.form}>
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    error={checkEmail}
+                    autoComplete="email"
+                    value={detail.email}
+                    onChange={handleChange("email")}
+                    autoFocus
+                  />
+                  <FormControl
+                    style={{ margin: "0.5em 0 0 0" }}
+                    fullWidth
+                    variant="outlined"
+                  >
+                    <InputLabel error={checkPass} htmlFor="password">
+                      Password
+                    </InputLabel>
+                    <OutlinedInput
+                      id="password"
+                      label="Password"
+                      margin="normal"
+                      type={showPass ? "text" : "password"}
+                      required
+                      fullWidth
+                      error={checkPass}
+                      value={detail.password}
+                      onChange={handleChange("password")}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPass(!showPass)}
+                            onMouseDown={handleMouseDownPassword}
+                            edge="end"
+                          >
+                            {showPass ? <Visibility /> : <VisibilityOff />}
+                          </IconButton>
+                        </InputAdornment>
+                      }
+                    />
+                  </FormControl>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                    onClick={handleSubmit}
+                  >
+                    Sign In
+                  </Button>
+                  <Grid container>
+                    <Grid item xs>
+                      <Link style={{ textDecoration: "none" }} to="/forget">
+                        Forgot password?
+                      </Link>
+                    </Grid>
+                    <Grid item>
+                      <Link style={{ textDecoration: "none" }} to="/signup">
+                        {"Don't have an account? Sign Up"}
+                      </Link>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </div>
+              <Box mt={8}>
+                <Copyright />
+              </Box>
+            </Container>
+          </Box></>)
+      }
     </ThemeProvider>
+  </>
   );
 }
