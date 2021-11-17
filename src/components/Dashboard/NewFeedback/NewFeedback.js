@@ -24,7 +24,7 @@ const useStyle = makeStyles((theme) => ({
   }
 }))
 
-const Feed = ({ list, setDelId, setConfirmation }) => {
+const Feed = ({ list, setDelId, setConfirmation, value }) => {
 
   return (
     <TableBody>
@@ -54,7 +54,7 @@ const Feed = ({ list, setDelId, setConfirmation }) => {
             </TableCell>}
             {JSON.parse(localStorage.getItem('user')).role.toLowerCase() === "student" && <TableCell>
               {/* <IconButton color='secondary' onClick={() => { confirmation ? deleteFeedback(row._id) :  }} > */}
-              <Link to={`/submitFeed?fid=${row._id}&qid=${row.feedbackQuestions._id}`}><IconButton color='primary'>
+              <Link to={`/submitFeed?fid=${row._id}&qid=${row.feedbackQuestions._id}&isCourse=${value}`}><IconButton color='primary'>
                 <OpenInNewIcon />
               </IconButton>
               </Link>
@@ -130,7 +130,10 @@ export default function NewFeedback() {
   const deleteFeedback = async (id) => {
     dispatch(set())
     try {
-      const res = await axios.delete(`https://sgp-feedback-system.herokuapp.com/api/feedback?id=${id}`, {
+
+      let url = value === 0 ? `https://sgp-feedback-system.herokuapp.com/api/feedback?id=${id}` : `https://sgp-feedback-system.herokuapp.com/api/courseFeedback?id=${id}`
+
+      const res = await axios.delete(url, {
         headers: {
           Authorization: `Bearer ${JWTtoken}`
         }
@@ -199,6 +202,7 @@ export default function NewFeedback() {
           <Feed
             list={value === 0 ? feedbacks : courseFeedbacks}
             setDelId={delId => setDelId(delId)}
+            value={value}
             setConfirmation={confirmation => setConfirmation(confirmation)}
           />
           {/* <TableBody> */}
