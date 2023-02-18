@@ -1,38 +1,58 @@
-import React, { useState } from 'react'
-import axios from 'axios'
+import React, { useState } from "react";
+import axios from "axios";
 import {
-  Avatar, Button, TextField, OutlinedInput, Grid, Box,
-  Typography, Container, FormControl, Select, InputLabel,
-  MenuItem, InputAdornment, IconButton,
-  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
-} from '@material-ui/core'
-import { Link, useHistory } from 'react-router-dom'
-import Face from '@material-ui/icons/FaceOutlined'
-import Visibility from '@material-ui/icons/Visibility'
-import VisibilityOff from '@material-ui/icons/VisibilityOff'
-import { makeStyles, createTheme, ThemeProvider } from '@material-ui/core/styles'
+  Avatar,
+  Button,
+  TextField,
+  OutlinedInput,
+  Grid,
+  Box,
+  Typography,
+  Container,
+  FormControl,
+  Select,
+  InputLabel,
+  MenuItem,
+  InputAdornment,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@material-ui/core";
+import { Link, useHistory } from "react-router-dom";
+import Face from "@material-ui/icons/FaceOutlined";
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import {
+  makeStyles,
+  createTheme,
+  ThemeProvider,
+} from "@material-ui/core/styles";
 import { useDispatch } from "react-redux";
 import { openSnack } from "../redux/reducers/snackSlice";
-import { set, reset } from '../redux/reducers/loadingSlice'
-import Blob2 from '../images/svgs/Blob1.svg'
+import { set, reset } from "../redux/reducers/loadingSlice";
+import Blob2 from "../images/svgs/Blob1.svg";
 
-const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const emailRegex =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,16}$/;
 const nameRegex = /^[a-zA-Z0-9_-]{3,16}$/;
 
 const theme = createTheme({
   palette: {
     primary: {
-      light: '#757ce8',
-      main: '#4A5CFF',
-      dark: '#002884',
-      contrastText: '#fff',
+      light: "#757ce8",
+      main: "#4A5CFF",
+      dark: "#002884",
+      contrastText: "#fff",
     },
     secondary: {
-      light: '#ff7961',
-      main: '#f44336',
-      dark: '#ba000d',
-      contrastText: '#000',
+      light: "#ff7961",
+      main: "#f44336",
+      dark: "#ba000d",
+      contrastText: "#000",
     },
   },
 });
@@ -40,153 +60,187 @@ const theme = createTheme({
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      Feedback System
-      {' '}
-      {new Date().getFullYear()}
-      {'.'}
+      {"Copyright © "}
+      Feedback System {new Date().getFullYear()}
+      {"."}
     </Typography>
   );
 }
 
 const useStyles = makeStyles((theme) => ({
   main: {
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-    position: 'relative',
-    overflow: 'hidden',
-    zIndex: 1
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    position: "relative",
+    overflow: "hidden",
+    zIndex: 1,
   },
   blob1: {
-    position: 'absolute',
+    position: "absolute",
     // top: '-50%',
     // left: theme.breakpoints.down('md') ? '-10%' : '-20%',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down("sm")]: {
       left: "-60%",
-      bottom: "-50%"
+      bottom: "-50%",
     },
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up("md")]: {
       left: "-20%",
-      bottom: "-50%"
+      bottom: "-50%",
     },
-    zIndex: -10
+    zIndex: -10,
   },
   blob2: {
-    position: 'absolute',
+    position: "absolute",
     // bottom: "-50%",
     // right: "-20%",
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down("sm")]: {
       right: "-60%",
-      top: "-50%"
+      top: "-50%",
     },
-    [theme.breakpoints.up('md')]: {
+    [theme.breakpoints.up("md")]: {
       right: "-20%",
-      top: "-50%"
+      top: "-50%",
     },
-    zIndex: -10
+    zIndex: -10,
   },
   paper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
-    width: '3em',
-    height: '3em'
+    width: "3em",
+    height: "3em",
   },
   form: {
-    width: '100%', // Fix IE 11 issue.
+    width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
     borderRadius: theme.spacing(1),
     padding: theme.spacing(2),
     // zIndex: theme.zIndex.modal
-    background: '#fff'
+    background: "#fff",
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
-    padding: '0.75em',
-    color: '#fff'
+    padding: "0.75em",
+    color: "#fff",
   },
 }));
 
 export default function SignUp() {
-  const history = useHistory()
-  const classes = useStyles()
-  const dispatch = useDispatch()
-  const [detail, setDetail] = useState({ password: '', confirmPassword: '', name: '', email: '', role: '', department: '', institute: '' });
-  const [vCode, setVCode] = useState('')
-  const [showPass, setShowPass] = useState(false)
-  const [openDialog, setOpenDialog] = useState(false)
+  const history = useHistory();
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const [detail, setDetail] = useState({
+    password: "",
+    confirmPassword: "",
+    name: "",
+    email: "",
+    role: "",
+    department: "",
+    institute: "",
+  });
+  const [vCode, setVCode] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   // const [openSnack, setOpenSnack] = useState({ open: false, message: 'Success' })
-  const [showCPass, setShowCPass] = useState(false)
-  const [checkEmail, setCheckEmail] = useState(false)
-  const [checkPass, setCheckPass] = useState(false)
-  const [checkCPass, setCheckCPass] = useState(false)
-  const [checkName, setCheckName] = useState(false)
+  const [showCPass, setShowCPass] = useState(false);
+  const [checkEmail, setCheckEmail] = useState(false);
+  const [checkPass, setCheckPass] = useState(false);
+  const [checkCPass, setCheckCPass] = useState(false);
+  const [checkName, setCheckName] = useState(false);
 
   const checkFields = (regex, value, type) => {
     if (!regex.test(value)) {
-      type(true)
+      type(true);
     } else {
-      type(false)
+      type(false);
     }
-  }
+  };
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
   const handleChange = (prop) => (event) => {
     setDetail({ ...detail, [prop]: event.target.value });
-    checkFields(prop === 'email' ? emailRegex : (prop === 'name' ? nameRegex : passRegex), event.target.value, prop === 'email' ? setCheckEmail : (prop === 'name' ? setCheckName : (prop === 'confirmPassword' ? setCheckCPass : setCheckPass)))
+    checkFields(
+      prop === "email" ? emailRegex : prop === "name" ? nameRegex : passRegex,
+      event.target.value,
+      prop === "email"
+        ? setCheckEmail
+        : prop === "name"
+        ? setCheckName
+        : prop === "confirmPassword"
+        ? setCheckCPass
+        : setCheckPass
+    );
   };
 
   const handleVerification = () => {
-    if (vCode === '') return
-    dispatch(set())
-    axios.post('https://sgp-feedback-system.herokuapp.com/api/verify', {
-      email: detail.email,
-      otp: vCode,
-      reSend: false
-    })
-      .then(res => {
-        console.log(res.data)
-        dispatch(reset())
+    if (vCode === "") return;
+    dispatch(set());
+    axios
+      .post("https://fair-bat-hat.cyclic.app/api/verify", {
+        email: detail.email,
+        otp: vCode,
+        reSend: false,
+      })
+      .then((res) => {
+        console.log(res.data);
+        dispatch(reset());
         // setOpenSnack({ open: true, message: 'E-mail Verified Successfully' })
-        dispatch(openSnack({ message: 'E-mail Verified Successfully', type: "success" }))
-        setOpenDialog(false)
-        history.push('/')
+        dispatch(
+          openSnack({
+            message: "E-mail Verified Successfully",
+            type: "success",
+          })
+        );
+        setOpenDialog(false);
+        history.push("/");
       })
-      .catch(err => {
-        console.error(err)
-        dispatch(reset())
-        dispatch(openSnack({ message: err.response.data.message, type: "error" }))
-      })
-  }
+      .catch((err) => {
+        console.error(err);
+        dispatch(reset());
+        dispatch(
+          openSnack({ message: err.response.data.message, type: "error" })
+        );
+      });
+  };
 
   const handleSubmit = () => {
-    if (detail.password === '' || detail.email === '' || detail.name === '' || detail.role === '' || detail.department === '' || detail.institute === '') {
-      return
+    if (
+      detail.password === "" ||
+      detail.email === "" ||
+      detail.name === "" ||
+      detail.role === "" ||
+      detail.department === "" ||
+      detail.institute === ""
+    ) {
+      return;
     }
-    dispatch(set())
-    axios.post('https://sgp-feedback-system.herokuapp.com/api/signup', {
-      email: detail.email,
-      password: detail.password,
-      role: detail.role,
-      userName: detail.name,
-      department: detail.department,
-      institute: detail.institute
-    })
-      .then(res => {
-        console.log(res)
-        dispatch(reset())
+    dispatch(set());
+    axios
+      .post("https://fair-bat-hat.cyclic.app/api/signup", {
+        email: detail.email,
+        password: detail.password,
+        role: detail.role,
+        userName: detail.name,
+        department: detail.department,
+        institute: detail.institute,
+      })
+      .then((res) => {
+        console.log(res);
+        dispatch(reset());
         // if (res.status === 200) {
         // setOpenSnack({ open: true, message: 'Successfully Signed-UP' })
-        dispatch(openSnack({ message: 'Successfully Signed-UP', type: "success" }))
-        setOpenDialog(true)
+        dispatch(
+          openSnack({ message: "Successfully Signed-UP", type: "success" })
+        );
+        setOpenDialog(true);
         // } else {
         //   if (res.status === 422) {
         //     // eslint-disable-next-line no-throw-literal
@@ -197,14 +251,16 @@ export default function SignUp() {
         //   }
         // }
       })
-      .catch(err => {
-        console.error(err)
-        console.log(err.response.data.message)
-        dispatch(reset())
+      .catch((err) => {
+        console.error(err);
+        console.log(err.response.data.message);
+        dispatch(reset());
         // setOpenSnack({ open: true, message: err.response.data.message })
-        dispatch(openSnack({ message: err.response.data.message, type: "error" }))
-      })
-  }
+        dispatch(
+          openSnack({ message: err.response.data.message, type: "error" })
+        );
+      });
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -218,21 +274,26 @@ export default function SignUp() {
           message={openSnack.message}
           key={'topright'}
         /> */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} aria-labelledby="form-dialog-title">
+        <Dialog
+          open={openDialog}
+          onClose={() => setOpenDialog(false)}
+          aria-labelledby="form-dialog-title"
+        >
           <DialogTitle id="form-dialog-title">E-Mail Verification</DialogTitle>
           <DialogContent>
             <DialogContentText>
-              Please Verify your Email, an 6 - digit Verification code has been sent to your E-mail.
+              Please Verify your Email, an 6 - digit Verification code has been
+              sent to your E-mail.
             </DialogContentText>
             <TextField
               autoFocus
-              variant='filled'
+              variant="filled"
               margin="dense"
               id="otp"
               label="Verification Code"
               type="number"
               value={vCode}
-              onChange={e => setVCode(e.target.value)}
+              onChange={(e) => setVCode(e.target.value)}
               fullWidth
             />
           </DialogContent>
@@ -264,7 +325,7 @@ export default function SignUp() {
                 name="name"
                 error={checkName}
                 value={detail.name}
-                onChange={handleChange('name')}
+                onChange={handleChange("name")}
                 autoFocus
               />
               <TextField
@@ -276,21 +337,27 @@ export default function SignUp() {
                 name="email"
                 value={detail.email}
                 error={checkEmail}
-                onChange={handleChange('email')}
+                onChange={handleChange("email")}
                 autoComplete="email"
               />
-              <FormControl style={{ margin: "0.5em 0 0 0" }} fullWidth variant='outlined'>
-                <InputLabel error={checkPass} htmlFor="password">Password</InputLabel>
+              <FormControl
+                style={{ margin: "0.5em 0 0 0" }}
+                fullWidth
+                variant="outlined"
+              >
+                <InputLabel error={checkPass} htmlFor="password">
+                  Password
+                </InputLabel>
                 <OutlinedInput
                   id="password"
                   label="Password"
                   // margin="normal"
-                  type={showPass ? 'text' : 'password'}
+                  type={showPass ? "text" : "password"}
                   required
                   error={checkPass}
                   fullWidth
                   value={detail.password}
-                  onChange={handleChange('password')}
+                  onChange={handleChange("password")}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
@@ -306,18 +373,24 @@ export default function SignUp() {
                 />
               </FormControl>
 
-              <FormControl style={{ margin: "0.5em 0 0 0" }} fullWidth variant='outlined'>
-                <InputLabel error={checkCPass} htmlFor="Cpassword">Confirm Password</InputLabel>
+              <FormControl
+                style={{ margin: "0.5em 0 0 0" }}
+                fullWidth
+                variant="outlined"
+              >
+                <InputLabel error={checkCPass} htmlFor="Cpassword">
+                  Confirm Password
+                </InputLabel>
                 <OutlinedInput
                   id="Cpassword"
                   label="Confirm Password"
                   // margin="normal"
-                  type={showCPass ? 'text' : 'password'}
+                  type={showCPass ? "text" : "password"}
                   required
                   fullWidth
                   error={checkCPass}
                   value={detail.confirmPassword}
-                  onChange={handleChange('confirmPassword')}
+                  onChange={handleChange("confirmPassword")}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
@@ -332,13 +405,21 @@ export default function SignUp() {
                   }
                 />
               </FormControl>
-              <FormControl fullWidth required style={{ margin: "0.5em 0 0 0" }} variant="outlined" className={classes.formControl}>
-                <InputLabel id="demo-simple-select-outlined-label">Role</InputLabel>
+              <FormControl
+                fullWidth
+                required
+                style={{ margin: "0.5em 0 0 0" }}
+                variant="outlined"
+                className={classes.formControl}
+              >
+                <InputLabel id="demo-simple-select-outlined-label">
+                  Role
+                </InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
                   id="demo-simple-select-outlined"
                   value={detail.role}
-                  onChange={handleChange('role')}
+                  onChange={handleChange("role")}
                   label="Role"
                 >
                   <MenuItem value="">
@@ -346,18 +427,30 @@ export default function SignUp() {
                   </MenuItem>
                   <MenuItem value={"student"}>Student</MenuItem>
                   <MenuItem value={"faculty"}>Faculty</MenuItem>
-                  <MenuItem disabled value={"alumini"}>Alumini</MenuItem>
+                  <MenuItem disabled value={"alumini"}>
+                    Alumini
+                  </MenuItem>
                   {/* <MenuItem value={"employer"}>Employer</MenuItem> */}
-                  <MenuItem disabled value={"admin"}>Admin</MenuItem>
+                  <MenuItem disabled value={"admin"}>
+                    Admin
+                  </MenuItem>
                 </Select>
               </FormControl>
-              <FormControl fullWidth required style={{ margin: "0.5em 0" }} variant="outlined" className={classes.formControl}>
-                <InputLabel id="demo-simple-select-outlined-label">Institute</InputLabel>
+              <FormControl
+                fullWidth
+                required
+                style={{ margin: "0.5em 0" }}
+                variant="outlined"
+                className={classes.formControl}
+              >
+                <InputLabel id="demo-simple-select-outlined-label">
+                  Institute
+                </InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
                   id="demo-simple-select-outlined"
                   value={detail.institute}
-                  onChange={handleChange('institute')}
+                  onChange={handleChange("institute")}
                   label="Institute"
                 >
                   <MenuItem value="">
@@ -370,13 +463,20 @@ export default function SignUp() {
                   <MenuItem value={"admin"}>RPCP</MenuItem> */}
                 </Select>
               </FormControl>
-              <FormControl fullWidth required variant="outlined" className={classes.formControl}>
-                <InputLabel id="demo-simple-select-outlined-label">Department</InputLabel>
+              <FormControl
+                fullWidth
+                required
+                variant="outlined"
+                className={classes.formControl}
+              >
+                <InputLabel id="demo-simple-select-outlined-label">
+                  Department
+                </InputLabel>
                 <Select
                   labelId="demo-simple-select-outlined-label"
                   id="demo-simple-select-outlined"
                   value={detail.department}
-                  onChange={handleChange('department')}
+                  onChange={handleChange("department")}
                   label="Department"
                 >
                   <MenuItem value="">
@@ -401,7 +501,10 @@ export default function SignUp() {
               </Button>
               <Grid container>
                 <Grid item>
-                  <Link style={{ textDecoration: 'none', textAlign: 'right' }} to="/">
+                  <Link
+                    style={{ textDecoration: "none", textAlign: "right" }}
+                    to="/"
+                  >
                     {"Already have an account? Sign In"}
                   </Link>
                 </Grid>
@@ -413,6 +516,6 @@ export default function SignUp() {
           </Box>
         </Container>
       </Box>
-    </ThemeProvider >
+    </ThemeProvider>
   );
 }
