@@ -72,7 +72,7 @@ const Form = (props) => {
 
   useEffect(() => {
     axios
-      .get("https://fair-bat-hat.cyclic.app/api/faculty", {
+      .get("https://feedsys-backend.onrender.com/api/faculty", {
         headers: {
           Authorization: `Bearer ${JWTtoken}`,
         },
@@ -81,7 +81,7 @@ const Form = (props) => {
         setFacultyLst(res.data);
       });
     axios
-      .get("https://fair-bat-hat.cyclic.app/api/courses", {
+      .get("https://feedsys-backend.onrender.com/api/courses", {
         headers: {
           Authorization: `Bearer ${JWTtoken}`,
         },
@@ -90,7 +90,7 @@ const Form = (props) => {
         setCourseLst(res.data);
       });
     axios
-      .get("https://fair-bat-hat.cyclic.app/api/getfeedbackque", {
+      .get("https://feedsys-backend.onrender.com/api/getfeedbackque", {
         headers: {
           Authorization: `Bearer ${JWTtoken}`,
         },
@@ -168,7 +168,7 @@ const Form = (props) => {
     dispatch(set());
     try {
       const res = await axios.post(
-        `https://fair-bat-hat.cyclic.app/api/${
+        `https://feedsys-backend.onrender.com/api/${
           value === 0 ? "newFeedback" : "courseFeedback"
         }`,
         {

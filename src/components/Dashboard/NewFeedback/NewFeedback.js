@@ -113,12 +113,12 @@ export default function NewFeedback() {
 
   const courseFeedURL =
     role === "admin"
-      ? `https://fair-bat-hat.cyclic.app/api/courseFeedback`
-      : `https://fair-bat-hat.cyclic.app/api/courseFeedback?sem=${sem}&institute=${inst}&department=${depart}`;
+      ? `https://feedsys-backend.onrender.com/api/courseFeedback`
+      : `https://feedsys-backend.onrender.com/api/courseFeedback?sem=${sem}&institute=${inst}&department=${depart}`;
   const feedURL =
     role === "admin"
-      ? `https://fair-bat-hat.cyclic.app/api/getfeedbacklist`
-      : `https://fair-bat-hat.cyclic.app/api/getfeedbacklist?sem=${sem}&institute=${inst}&department=${depart}`;
+      ? `https://feedsys-backend.onrender.com/api/getfeedbacklist`
+      : `https://feedsys-backend.onrender.com/api/getfeedbacklist?sem=${sem}&institute=${inst}&department=${depart}`;
 
   const handleConfirmation = () => {
     setConfirmation(false);
@@ -171,8 +171,8 @@ export default function NewFeedback() {
     try {
       let url =
         value === 0
-          ? `https://fair-bat-hat.cyclic.app/api/feedback?id=${id}`
-          : `https://fair-bat-hat.cyclic.app/api/courseFeedback?id=${id}`;
+          ? `https://feedsys-backend.onrender.com/api/feedback?id=${id}`
+          : `https://feedsys-backend.onrender.com/api/courseFeedback?id=${id}`;
 
       const res = await axios.delete(url, {
         headers: {

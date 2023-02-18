@@ -83,7 +83,7 @@ export default function Settings() {
     dispatch(set());
     try {
       const res = await axios.get(
-        `https://fair-bat-hat.cyclic.app/api/feedbackAns?id=${id}`,
+        `https://feedsys-backend.onrender.com/api/feedbackAns?id=${id}`,
         {
           headers: {
             Authorization: `Bearer ${JWTtoken}`,

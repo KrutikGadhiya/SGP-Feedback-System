@@ -66,7 +66,7 @@ function App() {
       const token = localStorage.getItem("token").slice(1, -1);
       console.log(token);
       axios
-        .get(`https://fair-bat-hat.cyclic.app/api/user?id=${id}`, {
+        .get(`https://feedsys-backend.onrender.com/api/user?id=${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

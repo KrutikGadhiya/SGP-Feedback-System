@@ -51,7 +51,7 @@ export default function AddQueList() {
     dispatch(set());
     try {
       const res = await axios.get(
-        "https://fair-bat-hat.cyclic.app/api/getfeedbackque",
+        "https://feedsys-backend.onrender.com/api/getfeedbackque",
         {
           headers: {
             Authorization: `Bearer ${JWTtoken}`,
@@ -77,7 +77,7 @@ export default function AddQueList() {
     dispatch(set());
     try {
       const res = await axios.delete(
-        `https://fair-bat-hat.cyclic.app/api/feedbackQue?id=${id}`,
+        `https://feedsys-backend.onrender.com/api/feedbackQue?id=${id}`,
         {
           headers: {
             Authorization: `Bearer ${JWTtoken}`,

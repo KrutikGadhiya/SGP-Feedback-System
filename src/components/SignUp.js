@@ -184,7 +184,7 @@ export default function SignUp() {
     if (vCode === "") return;
     dispatch(set());
     axios
-      .post("https://fair-bat-hat.cyclic.app/api/verify", {
+      .post("https://feedsys-backend.onrender.com/api/verify", {
         email: detail.email,
         otp: vCode,
         reSend: false,
@@ -224,7 +224,7 @@ export default function SignUp() {
     }
     dispatch(set());
     axios
-      .post("https://fair-bat-hat.cyclic.app/api/signup", {
+      .post("https://feedsys-backend.onrender.com/api/signup", {
         email: detail.email,
         password: detail.password,
         role: detail.role,

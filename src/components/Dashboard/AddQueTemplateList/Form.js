@@ -53,7 +53,7 @@ const Form = (props) => {
     dispatch(set());
     try {
       const res = await axios.post(
-        "https://fair-bat-hat.cyclic.app/api/addfeedbackque",
+        "https://feedsys-backend.onrender.com/api/addfeedbackque",
         {
           name: name,
           questions: queList,

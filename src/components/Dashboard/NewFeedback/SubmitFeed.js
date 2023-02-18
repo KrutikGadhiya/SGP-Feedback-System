@@ -79,7 +79,7 @@ export default function SubmitFeed() {
     dispatch(set());
     try {
       const res = await axios.get(
-        `https://fair-bat-hat.cyclic.app/api/getfeedbackque?id=${query.get(
+        `https://feedsys-backend.onrender.com/api/getfeedbackque?id=${query.get(
           "qid"
         )}`,
         {
@@ -110,8 +110,8 @@ export default function SubmitFeed() {
     try {
       let url =
         query.get("isCourse") === 0
-          ? `https://fair-bat-hat.cyclic.app/api/feedbackAns`
-          : `https://fair-bat-hat.cyclic.app/api/courseFeedbackAns`;
+          ? `https://feedsys-backend.onrender.com/api/feedbackAns`
+          : `https://feedsys-backend.onrender.com/api/courseFeedbackAns`;
       const res = await axios.post(
         url,
         {

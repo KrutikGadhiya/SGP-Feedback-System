@@ -180,7 +180,7 @@ export default function SignIn({ isReq }) {
     if (!resend && vCode === "") return;
     dispatch(set());
     axios
-      .post("https://fair-bat-hat.cyclic.app/api/verify", {
+      .post("https://feedsys-backend.onrender.com/api/verify", {
         email: detail.email,
         otp: vCode,
         reSend: resend,
@@ -230,7 +230,7 @@ export default function SignIn({ isReq }) {
     }
     dispatch(set());
     axios
-      .post("https://fair-bat-hat.cyclic.app/api/login", detail)
+      .post("https://feedsys-backend.onrender.com/api/login", detail)
       .then((res) => {
         console.log(res.data);
         dispatch(reset());
